@@ -1,0 +1,34 @@
+# Compiler and flags
+CC = gcc
+CFLAGS = -Wall -Wextra -Werror -g -O2 -pedantic -std=c99
+LDFLAGS = 
+
+# Source and object files
+SRC = $(wildcard *.c)
+OBJ = $(SRC:.c=.o)
+TARGET = pinky
+
+# Default target to build the program
+all: $(TARGET)
+
+# Rule to link object files and create the executable
+$(TARGET): $(OBJ)
+	$(CC) $(OBJ) -o $(TARGET) $(LDFLAGS)
+
+# Rule to compile source files into object files
+%.o: %.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
+# Clean up generated files
+clean:
+	rm -f $(OBJ) $(TARGET)
+
+# Rebuild the program
+rebuild: clean all
+
+# Phony targets (not actual files)
+.PHONY: all clean rebuild
+
+# Run program
+run:
+	./$(TARGET) script.pinky
