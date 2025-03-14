@@ -1,102 +1,54 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-enum Token_type{
-  // Single-character tokens
-  TOKEN_LPAREN,    // (
-  TOKEN_RPAREN,    // )
-  TOKEN_LCURLY,    // {
-  TOKEN_RCURLY,    // }
-  TOKEN_LSQUAR,    // [
-  TOKEN_RSQUAR,    // ]
-  TOKEN_COMMA,     // ,
-  TOKEN_DOT,       // .
-  TOKEN_PLUS,      // +
-  TOKEN_MINUS,     // -
-  TOKEN_STAR,      // *
-  TOKEN_SLASH,     // /
-  TOKEN_CARET,     // ^
-  TOKEN_MOD,       // %
-  TOKEN_COLON,     // :
-  TOKEN_QUESTION,  // ?
-  TOKEN_NOT,       // ~
-  TOKEN_GT,        // >
-  TOKEN_LT,        // <
-  
-  // Multi-character tokens
-  TOKEN_GE,        // >=
-  TOKEN_LE,        // <=
-  TOKEN_NE,        // ~=
-  TOKEN_EQ,        // ==
-  TOKEN_ASSIGN,    // :=
-  TOKEN_GTGT,      // >>
-  TOKEN_LTLT,      // <<
+#include "lexer.h"
 
-  // Literals
-  TOKEN_IDENTIFIER,
-  TOKEN_STRING,
-  TOKEN_INTEGER,
-  TOKEN_FLOAT,
-
-  // Keywords
-  TOKEN_IF,
-  TOKEN_THEN,
-  TOKEN_ELSE,
-  TOKEN_TRUE,
-  TOKEN_FALSE,
-  TOKEN_AND,
-  TOKEN_OR,
-  TOKEN_WHILE,
-  TOKEN_DO,
-  TOKEN_FOR,
-  TOKEN_FUNC,
-  TOKEN_NULL,
-  TOKEN_END,
-  TOKEN_PRINT,
-  TOKEN_PRINTLN,
-  TOKEN_RET
-};
-
-
-struct Lexer{
-  int start_character;
-  int current_character;
-  int current_line;
-  struct Token*[] ;
-};
-
-
-struct Token{
-  enum Token_Type type;
-  
-};
-
-
-void lexer(char* file_name)
+char *file_to_str(const char *fp)
 {
-  FILE *fptr = fopen(file_name, "r");
-  if(fptr == NULL){
-    printf("File could not open\n");
+  FILE *file = fopen(fp, "rb");
+
+  if (!file) {
+    perror("Failed to open file");
     exit(1);
   }
 
-  char c = '\0';
-  while((c = fgetc(fptr)) != EOF){
-    
+  fseek(file, 0, SEEK_END);
+  long length = ftell(file);
+  rewind(file);
+
+  char *buffer = (char *)malloc(length + 1);
+  if (!buffer) {
+    perror("Failed to allocate memory");
+    fclose(file);
+    return NULL;
   }
+
+  fread(buffer, 1, length, file);
+  fclose(file);
+
+  buffer[length] = '\0';
+  return buffer;
+}
+
+void help(void)
+{
+  printf("Usage: pinky <filepath>\n");
+  exit(1);
 }
 
 int main(int argc, char *argv[])
 {
-  if(argc != 2){
-    printf("Error, 2 arguments are required\n");
-    exit(1);
+  if (argc < 2) {
+    help();
   }
 
-  printf("Print file name: %s\n", argv[1]);
+  const char *fp = argv[1];
+  char *src = file_to_str(fp);
 
-  // Pass source file
-  lexer(argv[1]);
-  
+  struct Lexer lexer = lex_file(src, fp);
+  (void)lexer;
+
+  free(src);
+
   return 0;
 }

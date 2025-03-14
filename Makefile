@@ -1,6 +1,6 @@
 # Compiler and flags
 CC = gcc
-CFLAGS = -Wall -Wextra -Werror -g -O2 -pedantic -std=c99
+CFLAGS = -Wall -Wextra -Werror -g -O0 -pedantic -std=c99
 LDFLAGS = 
 
 # Source and object files
