@@ -8,6 +8,7 @@
 
 // consume_while returns a counter to the number of indexes
 // we need to skip ahead until the while loop is broken by the predicate.
+// Predicate being a function pointer.
 size_t consume_while(char *s, int (*pred)(int))
 {
     size_t counter = 0;
