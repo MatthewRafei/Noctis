@@ -2,8 +2,10 @@
 #include <stddef.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdint.h>
 
 #include "s-umap.h"
+#include "fnv-1a.h"
 
 struct S_Umap s_umap_create(s_umap_hash hash, s_umap_vdestr vdestr)
 {
@@ -33,33 +35,35 @@ struct _S_Umap_Node* _s_umap_node_create(char* key, uint8_t value)
   // as string is already a pointer
   node->key = key;
 
-  node->value = value;
-  
-  
+  // Primitive type no malloc
+  node->value = value;  
 
   return node;
 }
 
-
-void s_umap_insert(struct S_Umap map, struct _S_Umap_Node* node)
+void s_umap_insert(struct S_Umap *map, struct _S_Umap_Node* node)
 {
+  uint32_t hash = fnv1a(node->key);
+  uint32_t index = hash % map->tbl.cap;
   
-  map.tbl.nodes = &node;
-  (void)map;
-  
+  map->tbl.nodes[index] = node;
 }
 
+void s_umap_free(struct S_Umap *map)
+{
+  (void)map;
+}
 
-
-
-
-  /*
-    1. Hash Table Initialization (s_umap_create):
-
-You need to allocate memory for your hash table’s internal structures. Specifically:
-
-    Allocate an array of pointers to nodes (nodes) that represents the table.
-    Set the hash function and optional value destructor.
-
-This sets up the table and prepares it for storing key-value pairs.
-  */
+int s_umap_search(const struct S_Umap *map, uint8_t value)
+{
+  if(!value){
+    printf("Error value is null");
+  }
+  
+  if(map->tbl.nodes[value]){
+    return 1;
+  }
+  else{
+    return 0;
+  }
+}

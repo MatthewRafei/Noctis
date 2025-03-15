@@ -35,12 +35,12 @@ struct Lexer lex_file(char *src, const char *fp)
         char ch = src[i];
 
         // Skip whitespace and tabs
-        if (ch == ' ' || ch == '\t') {
+        if(ch == ' ' || ch == '\t') {
             i += 1, col += 1;
         }
 
         // Skip newline and carriage return
-        else if (ch == '\n' || ch == '\r') {
+        else if(ch == '\n' || ch == '\r') {
             i += 1, row += 1, col = 1;
         }
 
@@ -52,12 +52,12 @@ struct Lexer lex_file(char *src, const char *fp)
         }
 
         // Identifiers/keywords
-        else if (isalpha(ch) || ch == '_') {
+        else if(isalpha(ch) || ch == '_'){
             ;
         }
 
         // Numbers
-        else if (isdigit(ch)) {
+        else if(isdigit(ch)) {
             ;
         }
 
