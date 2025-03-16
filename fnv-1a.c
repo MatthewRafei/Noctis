@@ -18,7 +18,7 @@ uint64_t fnv1a(char* key)
     */
     exit(1);
   }
-              
+
   // FNV-1a offset basis
   uint64_t hash = 2166136261;
 

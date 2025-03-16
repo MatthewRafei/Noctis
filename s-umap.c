@@ -48,7 +48,8 @@ struct _S_Umap_Node* _s_umap_node_create(char* key, uint8_t value)
 
 void s_umap_insert(struct S_Umap *map, struct _S_Umap_Node* node)
 {
-  uint32_t hash = map->hash(node->key);
+  // This needs to be uint64_t
+  uint64_t hash = map->hash(node->key);
   uint32_t index = hash % map->tbl.cap;
 
   struct _S_Umap_Node *tmp = map->tbl.nodes[index];
@@ -68,7 +69,7 @@ int s_umap_search(const struct S_Umap *map, char* key)
     printf("Error value is null");
   }
   
-  uint32_t hash = map->hash(key);
+  uint64_t hash = map->hash(key);
   uint32_t index = hash % map->tbl.cap;
   
   if(map->tbl.nodes[index]){
