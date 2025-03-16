@@ -68,6 +68,12 @@ struct Token {
   struct Token *next;
 };
 
-struct Token *tokenize();
+struct Token *token_alloc(enum Token_Type type,
+                          char *lexeme,
+                          size_t end,
+                          const char *fp,
+                          size_t row, size_t col);
+
+void token_dump(const struct Token *t);
 
 #endif // TOKEN_H

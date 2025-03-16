@@ -14,9 +14,20 @@ char *file_to_str(const char *fp)
 
   fseek(file, 0, SEEK_END);
   long length = ftell(file);
+  // Some file-systems might return -1
+  if(length == -1){
+    printf("Failed to determine file length\n");
+    fclose(file);
+    return NULL;
+  }
+
+  // Go through file one to determine length
+  // Then go back to beginning
   rewind(file);
 
-  char *buffer = (char *)malloc(length + 1);
+  // No need to cast char* as malloc's return type
+  // is already void *
+  char *buffer = malloc(length + 1);
   if (!buffer) {
     perror("Failed to allocate memory");
     fclose(file);
@@ -46,7 +57,7 @@ int main(int argc, char *argv[])
   char *src = file_to_str(fp);
 
   struct Lexer lexer = lex_file(src, fp);
-  (void)lexer;
+  lexer_dump(&lexer);
 
   free(src);
 

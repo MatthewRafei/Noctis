@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <stdint.h>
 #include <stddef.h>
 #include <stdlib.h>
@@ -7,15 +8,17 @@
 #include "s-umap.h"
 #include "fnv-1a.h"
 
+#define INITAL_CAPACITY 256
+
 struct S_Umap s_umap_create(s_umap_hash hash, s_umap_vdestr vdestr)
 {
   struct S_Umap map;
 
-  map.tbl.cap = 16; // Should be closet prime number above number of keys/0.75
+  map.tbl.cap = INITAL_CAPACITY;
   map.tbl.len = 0;
   map.tbl.nodes = NULL;
-  
-  (void)hash;
+
+  map.hash = hash;
   (void)vdestr;
 
   return map;
@@ -24,11 +27,13 @@ struct S_Umap s_umap_create(s_umap_hash hash, s_umap_vdestr vdestr)
 struct _S_Umap_Node* _s_umap_node_create(char* key, uint8_t value)
 {
   struct _S_Umap_Node* node = malloc(sizeof(struct _S_Umap_Node));
-  if(node){
+
+  // Undefined Behavior if not using == NULL
+  if(node == NULL){
     printf("Memory allocation error\n");
     exit(1);
   }
-  
+
   node->next = NULL;
 
   // Does not need to be malloc'd
@@ -43,24 +48,30 @@ struct _S_Umap_Node* _s_umap_node_create(char* key, uint8_t value)
 
 void s_umap_insert(struct S_Umap *map, struct _S_Umap_Node* node)
 {
-  uint32_t hash = fnv1a(node->key);
+  uint32_t hash = map->hash(node->key);
   uint32_t index = hash % map->tbl.cap;
-  
-  map->tbl.nodes[index] = node;
+
+  struct _S_Umap_Node *tmp = map->tbl.nodes[index];
+  (void)tmp;
+  assert(0 && "unimplemented");
 }
 
 void s_umap_free(struct S_Umap *map)
 {
   (void)map;
+  assert(0 && "unimplemented");
 }
 
-int s_umap_search(const struct S_Umap *map, uint8_t value)
+int s_umap_search(const struct S_Umap *map, char* key)
 {
-  if(!value){
+  if(!key){
     printf("Error value is null");
   }
   
-  if(map->tbl.nodes[value]){
+  uint32_t hash = map->hash(key);
+  uint32_t index = hash % map->tbl.cap;
+  
+  if(map->tbl.nodes[index]){
     return 1;
   }
   else{
