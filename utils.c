@@ -1,3 +1,4 @@
+// Global utility functions 
 #include <stdlib.h>
 #include <stdio.h>
 

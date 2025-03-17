@@ -35,13 +35,8 @@ unsigned long fnv1a(const char* key)
   */
   for(int i = 0; i < length; i++){
     // Implicit promotion to unsigned char as key[i] is already char
-    printf("key[i]: %c\n", key[i]);
-
-    // commenting this line also fixes the seg fault
     hash = hash ^ (unsigned char)key[i];
 
-    // Potential int overflow if hash was uint32_t
-    // So I changed it to uint64_t
     hash = hash * prime;
   }
   if(!hash){

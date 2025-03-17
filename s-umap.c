@@ -7,6 +7,7 @@
 #include <string.h>
 
 #include "s-umap.h"
+#include "token.h"
 #include "utils.h"
 #include "fnv-1a.h"
 
@@ -19,8 +20,13 @@ struct S_Umap s_umap_create(s_umap_hash hash, size_t nodev_stride)
   struct S_Umap map = (struct S_Umap) {
     .tbl = {
       // First one causes seg fault
-      //.nodes = (struct _S_Umap_Node **)s_malloc(sizeof(struct _S_Umap_Node *) * INITAL_CAPACITY),
-      .nodes = (struct _S_Umap_Node **)calloc(INITAL_CAPACITY, sizeof(struct _S_Umap_Node *)),
+      /*
+      .nodes = (struct _S_Umap_Node **)s_malloc(sizeof
+						(struct _S_Umap_Node *) *
+						INITAL_CAPACITY),
+      */
+      .nodes = (struct _S_Umap_Node **)calloc(INITAL_CAPACITY,
+					      sizeof(struct _S_Umap_Node *)),
       .len = 0,
       .cap = INITAL_CAPACITY,
     },
@@ -31,23 +37,15 @@ struct S_Umap s_umap_create(s_umap_hash hash, size_t nodev_stride)
   return map;
 }
 
-struct _S_Umap_Node* _s_umap_node_create(char* key, void *value, size_t nodev_stride)
+struct _S_Umap_Node* _s_umap_node_create(char* key,
+					 void *value,
+					 size_t nodev_stride)
 {
-  struct _S_Umap_Node* node = (struct _S_Umap_Node *)s_malloc(sizeof(struct _S_Umap_Node));
+  struct _S_Umap_Node* node = (struct _S_Umap_Node *)s_malloc
+    (sizeof(struct _S_Umap_Node));
   node->next = NULL;
 
-
-  node->key = strdup(key);
-
-  if(!node->key){
-    printf("Key is null\n");
-    exit(1);
-  }
-  else if(!key){
-    printf("Key is null\n");
-    exit(1);
-  }
-  
+  node->key = strdup(key);  
 
   node->value = s_malloc(nodev_stride);
   (void)memcpy((uint32_t *)node->value, (uint32_t *)value, nodev_stride);
@@ -65,22 +63,7 @@ static struct _S_Umap_Node *list_has_key(const struct S_Umap *m,
   *prev = NULL;
   struct _S_Umap_Node *it = m->tbl.nodes[idx];
   while (it) {
-
-    if(k == NULL){
-      printf("K is null\n");
-      exit(1);
-    }
-
-    if (!it) {
-      printf("it is NULL\n");
-      exit(1);
-    }
-    
     if (!strcmp(it->key, k)) {
-      if(!it){
-	printf("it is null\n");
-	exit(1);
-      }
       return it;
     }
     *prev = it;
@@ -130,9 +113,8 @@ void s_umap_free(struct S_Umap *map)
 
 int s_umap_search(const struct S_Umap *map, char* key)
 {
-  if(!key){
-    printf("Error value is null");
-  }
+
+  printf("What is key: %s\n", key);
   
   uint64_t hash = map->hash(key);
   uint32_t index = hash % map->tbl.cap;
@@ -144,3 +126,11 @@ int s_umap_search(const struct S_Umap *map, char* key)
     return 0;
   }
 }
+
+/*
+void s_umap_print(struct S_Umap *map)
+{
+  struct _S_Umap_Node node = map->tbl.nodes[1];
+  printf("What is at map node 1: %s\n", node.key);
+}
+*/

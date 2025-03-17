@@ -29,6 +29,7 @@ struct S_Umap {
 struct S_Umap s_umap_create(s_umap_hash hash, size_t nodev_stride);
 struct _S_Umap_Node* _s_umap_node_create(char* key, void* value, size_t nodev_stride);
 void s_umap_insert(struct S_Umap *map, char *key, void *value);
+int s_umap_search(const struct S_Umap *map, char* key);
 void s_umap_free(struct S_Umap *map);
 
 #endif // S_UMAP_H
