@@ -20,7 +20,7 @@ static struct S_Umap init_sym_keyword_tbl(void) {
     ",", ".",          // TOKEN_COMMA, TOKEN_DOT
     "+", "-",          // TOKEN_PLUS, TOKEN_MINUS
     "*", "/",          // TOKEN_STAR, TOKEN_SLASH
-    "^", "%%",          // TOKEN_CARET, TOKEN_MOD
+    "^", "%",          // TOKEN_CARET, TOKEN_MOD
     ":", "?",          // TOKEN_COLON, TOKEN_QUESTION
     "~",               // TOKEN_NOT
     ">", "<",          // TOKEN_GT, TOKEN_LT
@@ -30,27 +30,35 @@ static struct S_Umap init_sym_keyword_tbl(void) {
     ">>", "<<",        // TOKEN_GTGT, TOKEN_LTLT
   };
 
-  for (size_t i = 0; i < sizeof(syms)/sizeof(*syms); ++i) {
+  // i < (sizeof(syms)/sizeof(*syms))
+  printf("The size of sizeof(syms)/sizeof(*syms): %ld\n", sizeof(syms)/sizeof(*syms));
+
+  // Seg faults when i < 13
+  for (size_t i = 0; i < (sizeof(syms)/sizeof(*syms)); ++i) {
+
+    printf("String at syms[i]: %s\n", syms[i]);
+    
     s_umap_insert(&tbl, syms[i], (void*)&(enum Token_Type){(enum Token_Type)i});
   }
-
+  
+  /*
   // Keywords
   char *kws[] = KEYWORD_ASCPL;
 
   assert(sizeof(kws)/sizeof(*kws) == TOKEN_KEYWORD_LEN - TOKEN_SYMBOL_LEN);
 
   for (size_t i = 0; i < sizeof(kws)/sizeof(*kws); ++i) {
-    /*
+    
       Because s_umap_insert() takes void * as the value, we need to
       get the appropriate Token_Type that matches up with the appropriate
       keyword (see keywords.h) and making a variable in-place and taking
       the address of it to pass to s_umap_insert. The i+(int)TOKEN_SYMBOL_LEN+1 is for making
       sure we are "indexing" the Token_Type enum correctly.
-    */
+      
    // Might be compiler specific
     s_umap_insert(&tbl, kws[i], (void*)&(enum Token_Type){(enum Token_Type)(i+(int)TOKEN_SYMBOL_LEN+1)});
   }
-
+  */
   return tbl;
 }
 

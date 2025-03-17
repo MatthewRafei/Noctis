@@ -18,7 +18,9 @@ struct S_Umap s_umap_create(s_umap_hash hash, size_t nodev_stride)
 
   struct S_Umap map = (struct S_Umap) {
     .tbl = {
-      .nodes = (struct _S_Umap_Node **)s_malloc(sizeof(struct _S_Umap_Node *) * INITAL_CAPACITY),
+      // First one causes seg fault
+      //.nodes = (struct _S_Umap_Node **)s_malloc(sizeof(struct _S_Umap_Node *) * INITAL_CAPACITY),
+      .nodes = (struct _S_Umap_Node **)calloc(INITAL_CAPACITY, sizeof(struct _S_Umap_Node *)),
       .len = 0,
       .cap = INITAL_CAPACITY,
     },
@@ -32,10 +34,20 @@ struct S_Umap s_umap_create(s_umap_hash hash, size_t nodev_stride)
 struct _S_Umap_Node* _s_umap_node_create(char* key, void *value, size_t nodev_stride)
 {
   struct _S_Umap_Node* node = (struct _S_Umap_Node *)s_malloc(sizeof(struct _S_Umap_Node));
-
   node->next = NULL;
 
+
   node->key = strdup(key);
+
+  if(!node->key){
+    printf("Key is null\n");
+    exit(1);
+  }
+  else if(!key){
+    printf("Key is null\n");
+    exit(1);
+  }
+  
 
   node->value = s_malloc(nodev_stride);
   (void)memcpy((uint32_t *)node->value, (uint32_t *)value, nodev_stride);
@@ -53,7 +65,22 @@ static struct _S_Umap_Node *list_has_key(const struct S_Umap *m,
   *prev = NULL;
   struct _S_Umap_Node *it = m->tbl.nodes[idx];
   while (it) {
+
+    if(k == NULL){
+      printf("K is null\n");
+      exit(1);
+    }
+
+    if (!it) {
+      printf("it is NULL\n");
+      exit(1);
+    }
+    
     if (!strcmp(it->key, k)) {
+      if(!it){
+	printf("it is null\n");
+	exit(1);
+      }
       return it;
     }
     *prev = it;
