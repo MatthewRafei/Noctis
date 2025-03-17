@@ -4,7 +4,55 @@
 #include <stdlib.h>
 
 #include "lexer.h"
+#include "keywords.h"
+#include "s-umap.h"
+#include "token.h"
 #include "utils.h"
+#include "fnv-1a.h"
+
+static struct S_Umap init_sym_keyword_tbl(void) {
+  struct S_Umap tbl = s_umap_create(fnv1a, sizeof(enum Token_Type));
+
+  char *syms[] = {
+    "(", ")",          // TOKEN_LPAREN, TOKEN_RPAREN
+    "{", "}",          // TOKEN_LCURLY, TOKEN_RCURLY
+    "[", "]",          // TOKEN_LSQUAR, TOKEN_RSQUAR
+    ",", ".",          // TOKEN_COMMA, TOKEN_DOT
+    "+", "-",          // TOKEN_PLUS, TOKEN_MINUS
+    "*", "/",          // TOKEN_STAR, TOKEN_SLASH
+    "^", "%%",          // TOKEN_CARET, TOKEN_MOD
+    ":", "?",          // TOKEN_COLON, TOKEN_QUESTION
+    "~",               // TOKEN_NOT
+    ">", "<",          // TOKEN_GT, TOKEN_LT
+    ">=", "<=",         // TOKEN_GE, TOKEN_LE
+    "~=", "==",         // TOKEN_NE, TOKEN_EQ
+    ":=",              // TOKEN_ASSIGN
+    ">>", "<<",        // TOKEN_GTGT, TOKEN_LTLT
+  };
+
+  for (size_t i = 0; i < sizeof(syms)/sizeof(*syms); ++i) {
+    s_umap_insert(&tbl, syms[i], (void*)&(enum Token_Type){(enum Token_Type)i});
+  }
+
+  // Keywords
+  char *kws[] = KEYWORD_ASCPL;
+
+  assert(sizeof(kws)/sizeof(*kws) == TOKEN_KEYWORD_LEN - TOKEN_SYMBOL_LEN);
+
+  for (size_t i = 0; i < sizeof(kws)/sizeof(*kws); ++i) {
+    /*
+      Because s_umap_insert() takes void * as the value, we need to
+      get the appropriate Token_Type that matches up with the appropriate
+      keyword (see keywords.h) and making a variable in-place and taking
+      the address of it to pass to s_umap_insert. The i+(int)TOKEN_SYMBOL_LEN+1 is for making
+      sure we are "indexing" the Token_Type enum correctly.
+    */
+   // Might be compiler specific
+    s_umap_insert(&tbl, kws[i], (void*)&(enum Token_Type){(enum Token_Type)(i+(int)TOKEN_SYMBOL_LEN+1)});
+  }
+
+  return tbl;
+}
 
 static void lexer_append(struct Lexer *l, struct Token *t)
 {
@@ -48,10 +96,12 @@ int not_RPAREN(int c)
 {
   return (char)c != ')';
 }
-      
 
 struct Lexer lex_file(char *src, const char *fp)
 {
+  struct S_Umap sym_keyword_tbl = init_sym_keyword_tbl();
+  (void)sym_keyword_tbl;
+
   struct Lexer lexer = (struct Lexer) {
     .hd = NULL,
     .tl = NULL,
@@ -117,7 +167,7 @@ struct Lexer lex_file(char *src, const char *fp)
 
     // Operators and keywords
     else {
-      ;
+      
     }
   }
   return lexer;

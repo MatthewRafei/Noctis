@@ -22,7 +22,7 @@
 // We can make an array of keywords
 #define KEYWORD_ASCPL { \
     KEYWORD_IF, \
-    KEYWORD_THEN, \ 
+    KEYWORD_THEN, \
     KEYWORD_ELSE, \
     KEYWORD_TRUE, \
     KEYWORD_FALSE, \
@@ -35,7 +35,7 @@
     KEYWORD_NULL, \
     KEYWORD_END, \
     KEYWORD_PRINT, \
-    KEYWORD_PRINTLN, \ 
+    KEYWORD_PRINTLN, \
     KEYWORD_RET \
 }
 

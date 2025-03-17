@@ -7,7 +7,7 @@
 // FNV-1a prime
 const uint32_t prime = 16777619;
 
-uint64_t fnv1a(char* key)
+unsigned long fnv1a(const char* key)
 {
   if(!key){
     printf("Error key is null");
@@ -20,7 +20,7 @@ uint64_t fnv1a(char* key)
   }
 
   // FNV-1a offset basis
-  uint64_t hash = 2166136261;
+  unsigned long hash = 2166136261;
 
   int length = strlen(key);
 
@@ -36,6 +36,6 @@ uint64_t fnv1a(char* key)
     // So I changed it to uint64_t
     hash = hash * prime;
   }
-  
+
   return hash;
 }

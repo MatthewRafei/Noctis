@@ -2,4 +2,4 @@
 
 set -xe
 
-cc -Wextra -Wall -Werror -pedantic -ggdb -O0 -o pinky *.c
+cc -Wextra -Wall -Werror -pedantic -g -O0 -o pinky *.c

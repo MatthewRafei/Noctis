@@ -1,11 +1,12 @@
 #ifndef TOKEN_H
 #define TOKEN_H
 
+#include <stdint.h>
 #include <stddef.h>
 
 enum Token_Type {
   // Single-character tokens
-  TOKEN_LPAREN,    // (
+  TOKEN_LPAREN = 0,// (
   TOKEN_RPAREN,    // )
   TOKEN_LCURLY,    // {
   TOKEN_RCURLY,    // }
@@ -33,12 +34,7 @@ enum Token_Type {
   TOKEN_ASSIGN,    // :=
   TOKEN_GTGT,      // >>
   TOKEN_LTLT,      // <<
-
-  // Literals
-  TOKEN_IDENTIFIER,
-  TOKEN_STRING,
-  TOKEN_INTEGER,
-  TOKEN_FLOAT,
+  TOKEN_SYMBOL_LEN, // DO NOT USE
 
   // Keywords
   TOKEN_IF,
@@ -56,7 +52,14 @@ enum Token_Type {
   TOKEN_END,
   TOKEN_PRINT,
   TOKEN_PRINTLN,
-  TOKEN_RET
+  TOKEN_RET,
+  TOKEN_KEYWORD_LEN, // DO NOT USE
+
+  // Literals
+  TOKEN_IDENTIFIER,
+  TOKEN_STRING,
+  TOKEN_INTEGER,
+  TOKEN_FLOAT,
 };
 
 struct Token {
