@@ -3,6 +3,14 @@
 
 #include "lexer.h"
 
+// This is to test keyword ascpl
+// delete after done
+#include "keywords.h"
+#include "s-umap.h"
+
+
+
+
 char *file_to_str(const char *fp)
 {
   FILE *file = fopen(fp, "rb");
@@ -52,6 +60,7 @@ int main(int argc, char *argv[])
   if (argc < 2) {
     help();
   }
+
 
   const char *fp = argv[1];
   char *src = file_to_str(fp);

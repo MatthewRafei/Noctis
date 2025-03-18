@@ -19,12 +19,6 @@ struct S_Umap s_umap_create(s_umap_hash hash, size_t nodev_stride)
 
   struct S_Umap map = (struct S_Umap) {
     .tbl = {
-      // First one causes seg fault
-      /*
-      .nodes = (struct _S_Umap_Node **)s_malloc(sizeof
-						(struct _S_Umap_Node *) *
-						INITAL_CAPACITY),
-      */
       .nodes = (struct _S_Umap_Node **)calloc(INITAL_CAPACITY,
 					      sizeof(struct _S_Umap_Node *)),
       .len = 0,
@@ -53,8 +47,8 @@ struct _S_Umap_Node* _s_umap_node_create(char* key,
   return node;
 }
 
-// Returns the node where its key == k. If no such
-// node is found, returns NULL.
+// Returns the node where its key == k.
+// If no such node is found, returns NULL.
 static struct _S_Umap_Node *list_has_key(const struct S_Umap *m,
                                          unsigned long idx,
                                          const char *k,
@@ -103,8 +97,12 @@ void s_umap_insert(struct S_Umap *map, char *key, void *value)
     }
     node_free(it);
   }
+  // Maybe this isnt right
+  map->tbl.len += 1;
 }
 
+// We can reuse the print logic to go through it
+// or maybe we can somehow hash the keywords/operators again
 void s_umap_free(struct S_Umap *map)
 {
   (void)map;
@@ -113,7 +111,7 @@ void s_umap_free(struct S_Umap *map)
 
 int s_umap_search(const struct S_Umap *map, char* key)
 {
-
+  
   printf("What is key: %s\n", key);
   
   uint64_t hash = map->hash(key);
@@ -128,9 +126,22 @@ int s_umap_search(const struct S_Umap *map, char* key)
 }
 
 /*
+  consider using hashes to print only the indices you
+  know for a fact are being used.
+*/
 void s_umap_print(struct S_Umap *map)
 {
-  struct _S_Umap_Node node = map->tbl.nodes[1];
-  printf("What is at map node 1: %s\n", node.key);
+  int len = map->tbl.cap;
+  printf("The len of the table: %ld\n", map->tbl.len);
+  for(int i = 0; i <= len; i++){
+    if(map->tbl.nodes[i]){
+      struct _S_Umap_Node *tmp = map->tbl.nodes[i];
+      printf("Keys for nodes[%d]: ", i);
+      while(tmp){
+	printf("\"%s\" -> ", tmp->key);
+	tmp = tmp->next;
+      }
+      printf("NULL\n");
+    }
+  }
 }
-*/

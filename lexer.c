@@ -107,7 +107,8 @@ int not_whitespace(int c)
 struct Lexer lex_file(char *src, const char *fp)
 {
   struct S_Umap sym_keyword_tbl = init_sym_keyword_tbl();
-  (void)sym_keyword_tbl;
+
+  s_umap_print(&sym_keyword_tbl);
 
   struct Lexer lexer = (struct Lexer) {
     .hd = NULL,

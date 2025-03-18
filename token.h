@@ -67,7 +67,6 @@ struct Token {
   char *lexeme;
   const char *fp;
   size_t row, col;
-  // Next thing in the linked list
   struct Token *next;
 };
 
