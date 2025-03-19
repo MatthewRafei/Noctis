@@ -109,11 +109,44 @@ int not_sym(int c)
   return !isalnum(c) && c != '_' && c != ' ' && c != '\n' && c != '\t' && c != '\r';
 }
 
+int is_identifier(int c)
+{
+  return isalnum(c) || c == '_';
+}
+
+enum Token_Type *determine_symbol(const char *s, size_t op_len, struct S_Umap *sym_keyword_tbl, size_t *actual_len)
+{
+  *actual_len = 0;
+  char buf[256] = {0};
+  strncpy(buf, s, op_len);
+
+  // struct {
+  //   char *data;
+  //   size_t len, cap;
+  // } buf = {
+  //   .data = NULL,
+  //   .len = 0,
+  //   .cap = 0,
+  // }
+
+  for (int i = (int)op_len-1; i >= 0; --i) {
+    if (s_umap_contains(sym_keyword_tbl, buf)) {
+      *actual_len = (size_t)i+1;
+      return s_umap_get(sym_keyword_tbl, buf);
+    }
+    buf[i] = '\0';
+  }
+  return (enum Token_Type *)NULL;
+}
+
+int not_quote(int c)
+{
+  return c != '"' && c != '\'';
+}
+
 struct Lexer lex_file(char *src, const char *fp)
 {
   struct S_Umap sym_keyword_tbl = init_sym_keyword_tbl();
-
-  //s_umap_print(&sym_keyword_tbl);
 
   struct Lexer lexer = (struct Lexer) {
     .hd = NULL,
@@ -164,7 +197,7 @@ struct Lexer lex_file(char *src, const char *fp)
 
     // Identifiers and keywords
     else if(isalpha(ch) || ch == '_'){
-      size_t len = consume_while(src + i, isalnum);
+      size_t len = consume_while(src + i, is_identifier);
 
       // Use len to create a substring to search
       // for keywords in the hash table
@@ -186,46 +219,36 @@ struct Lexer lex_file(char *src, const char *fp)
       }
     }
 
+    // TODO: Make it so that character literals are their own thing.
+    else if (ch == '"' || ch == '\'') {
+      i += 1, col += 1; // " or '
+      size_t len = consume_while(src+i, not_quote);
+      struct Token *t = token_alloc(TOKEN_STRING, src+i, len, fp, row, col);
+      lexer_append(&lexer, t);
+      i += len + 1, col += len + 1; // " or ' + length of string
+    }
+
     // Numbers (floats unimplemented)
     else if(isdigit(ch)) {
       size_t len = consume_while(src + i, isdigit);
 
-      struct Token *t = token_alloc(TOKEN_INTEGER,
-				    src+i, len, fp, row, col);
+      struct Token *t = token_alloc(TOKEN_INTEGER, src+i, len, fp, row, col);
       lexer_append(&lexer, t);
       i += len, col += len;
     }
 
     // Operators
     else {
-      size_t len = consume_while(src + i, not_sym);
-      char substring[len + 1];
-      memcpy(substring, src + i, len);
-      substring[len] = '\0';
+      size_t op_len = consume_while(src + i, not_sym);
+      size_t len = 0;
+      enum Token_Type *type = determine_symbol(src+i, op_len, &sym_keyword_tbl, &len);
 
-      //char *canidate = malloc(sizeof(char));
-
-      char canidate[256] = {0};
-
-      size_t it = 0;
-      while(substring[it]){
-	canidate[it] = substring[it];
-	if(!s_umap_contains(&sym_keyword_tbl, canidate)){
-	  canidate[it+1] = '\0';
-	  printf("what is canidate: %s\n", canidate);
-	  break;
-	}
-	it++;
+      if (!type) {
+        err_wargs("invalid type at: %s", src+i);
       }
 
-      /*
-      size_t end = len - it;
-      printf("What is canidate: %s\n", canidate);
-      printf("What is end: %ld\n", end);
-      */
-
-      
-      //struct Token *t = token_alloc((enum Token_Type *)s_umap_get(&sym_keyword_tbl, canidate),canidate,
+      struct Token *t = token_alloc(*type, src + i, len, fp, row, col);
+      lexer_append(&lexer, t);
 
       i += len, col += len;
     }

@@ -21,6 +21,8 @@
         exit(1); \
     } while (0)
 
+#define halt (exit(0))
+
 void *s_malloc(size_t bytes);
 
 #endif // UTILS_H

@@ -4,8 +4,8 @@
 #define KEYWORD_IF "if"
 #define KEYWORD_THEN "then"
 #define KEYWORD_ELSE "else"
-#define KEYWORD_TRUE "TRUE"
-#define KEYWORD_FALSE "FALSE"
+#define KEYWORD_TRUE "true"
+#define KEYWORD_FALSE "false"
 #define KEYWORD_AND "and"
 #define KEYWORD_OR "or"
 #define KEYWORD_WHILE "while"
@@ -13,10 +13,10 @@
 #define KEYWORD_FOR "for"
 #define KEYWORD_FUNC "func"
 #define KEYWORD_NULL "NULL"
-#define KEYWORD_END "END"
+#define KEYWORD_END "end"
 #define KEYWORD_PRINT "print"
 #define KEYWORD_PRINTLN "println"
-#define KEYWORD_RET "RET"
+#define KEYWORD_RET "ret"
 
 // Keyword as compound literal 
 // We can make an array of keywords

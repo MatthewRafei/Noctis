@@ -133,7 +133,7 @@ int s_umap_contains(const struct S_Umap *map, char *key)
   consider using hashes to print only the indices you
   know for a fact are being used.
 */
-void s_umap_print(struct S_Umap *map)
+void s_umap_print(struct S_Umap *map, void (*vp)(const void *))
 {
   int len = map->tbl.cap;
   printf("The len of the table: %ld\n", map->tbl.len);
@@ -142,10 +142,19 @@ void s_umap_print(struct S_Umap *map)
       struct _S_Umap_Node *tmp = map->tbl.nodes[i];
       printf("Keys for nodes[%d]: ", i);
       while(tmp){
-        printf("\"%s\" -> ", tmp->key);
+        printf("(\"%s\"", tmp->key);
+        if(vp) {
+          printf(", ");
+          vp(tmp->value);
+        }
         tmp = tmp->next;
+        if (tmp) {
+          printf(") -> ");
+        } else {
+          printf(")\n");
+        }
       }
-      printf("NULL\n");
+      //printf("NULL\n");
     }
   }
 }
