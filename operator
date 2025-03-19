@@ -1,0 +1,29 @@
+
+      enum Token_Type *type;
+      size_t it = 0;
+      char buf[256] = {0};
+      //buf[0] = src[i];
+
+      while (src[i + it]) {
+	
+        buf[it] = src[i+it];
+	
+        if (!s_umap_contains(&sym_keyword_tbl, buf)) {
+          buf[it-1] = '\0';
+          break;
+        }
+	printf("Is it failing here\n");
+        type = (enum Token_Type *)s_umap_get(&sym_keyword_tbl, buf);
+	printf("2\n");
+        it += 1;
+      }
+      
+      
+      if (!type) {
+        err("invalid operator");
+      }
+
+      struct Token *t = token_alloc(*type, src+i, it, fp, row, col);
+      lexer_append(&lexer, t);
+      i += it, col += it;
+    }

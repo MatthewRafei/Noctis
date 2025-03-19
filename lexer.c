@@ -198,29 +198,36 @@ struct Lexer lex_file(char *src, const char *fp)
 
     // Operators
     else {
+      size_t len = consume_while(src + i, not_sym);
+      char substring[len + 1];
+      memcpy(substring, src + i, len);
+      substring[len] = '\0';
 
-      enum Token_Type *type;
-      size_t it = 1;
-      char buf[256] = {0};
-      buf[0] = src[i];
+      //char *canidate = malloc(sizeof(char));
 
-      while (src[i + it]) {
-        buf[it] = src[i+it];
-        if (!s_umap_contains(&sym_keyword_tbl, buf)) {
-          buf[it-1] = '\0';
-          break;
-        }
-        type = (enum Token_Type *)s_umap_get(&sym_keyword_tbl, buf);
-        ++it;
+      char canidate[256] = {0};
+
+      size_t it = 0;
+      while(substring[it]){
+	canidate[it] = substring[it];
+	if(!s_umap_contains(&sym_keyword_tbl, canidate)){
+	  canidate[it+1] = '\0';
+	  printf("what is canidate: %s\n", canidate);
+	  break;
+	}
+	it++;
       }
+
+      /*
+      size_t end = len - it;
+      printf("What is canidate: %s\n", canidate);
+      printf("What is end: %ld\n", end);
+      */
+
       
-      if (!type) {
-        err("invalid operator");
-      }
+      //struct Token *t = token_alloc((enum Token_Type *)s_umap_get(&sym_keyword_tbl, canidate),canidate,
 
-      struct Token *t = token_alloc(*type, src+i, it, fp, row, col);
-      lexer_append(&lexer, t);
-      i += it, col += it;
+      i += len, col += len;
     }
   }
   return lexer;
