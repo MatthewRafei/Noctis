@@ -104,11 +104,16 @@ int not_whitespace(int c)
   return (char)c != ' ';
 }
 
+int not_sym(int c)
+{
+  return !isalnum(c) && c != '_' && c != ' ' && c != '\n' && c != '\t' && c != '\r';
+}
+
 struct Lexer lex_file(char *src, const char *fp)
 {
   struct S_Umap sym_keyword_tbl = init_sym_keyword_tbl();
 
-  s_umap_print(&sym_keyword_tbl);
+  //s_umap_print(&sym_keyword_tbl);
 
   struct Lexer lexer = (struct Lexer) {
     .hd = NULL,
@@ -167,24 +172,24 @@ struct Lexer lex_file(char *src, const char *fp)
       memcpy(substring, src + i, len);
       substring[len] = '\0';
 
-      if(s_umap_search(&sym_keyword_tbl, substring)){
-	//struct Token_Type = 
-	//struct Token *t = token_alloc(
-	printf("Keyword skip\n");
-	i += len, col += len;
+      enum Token_Type *type = (enum Token_Type *)s_umap_get(&sym_keyword_tbl, substring);
+
+      if (type != NULL) {
+        struct Token *t = token_alloc(*type, src+i, len, fp, row, col);
+        lexer_append(&lexer, t);
+        i += len, col += len;
       }
       else{
-	struct Token *t = token_alloc(TOKEN_IDENTIFIER,
-				      src+i, len, fp, row, col);
-	lexer_append(&lexer, t);
-	i += len, col += len;
+        struct Token *t = token_alloc(TOKEN_IDENTIFIER, src+i, len, fp, row, col);
+        lexer_append(&lexer, t);
+        i += len, col += len;
       }
     }
 
     // Numbers (floats unimplemented)
     else if(isdigit(ch)) {
       size_t len = consume_while(src + i, isdigit);
-      
+
       struct Token *t = token_alloc(TOKEN_INTEGER,
 				    src+i, len, fp, row, col);
       lexer_append(&lexer, t);
@@ -193,7 +198,29 @@ struct Lexer lex_file(char *src, const char *fp)
 
     // Operators
     else {
-      ;
+
+      enum Token_Type *type;
+      size_t it = 1;
+      char buf[256] = {0};
+      buf[0] = src[i];
+
+      while (src[i + it]) {
+        buf[it] = src[i+it];
+        if (!s_umap_contains(&sym_keyword_tbl, buf)) {
+          buf[it-1] = '\0';
+          break;
+        }
+        type = (enum Token_Type *)s_umap_get(&sym_keyword_tbl, buf);
+        ++it;
+      }
+      
+      if (!type) {
+        err("invalid operator");
+      }
+
+      struct Token *t = token_alloc(*type, src+i, it, fp, row, col);
+      lexer_append(&lexer, t);
+      i += it, col += it;
     }
   }
   return lexer;

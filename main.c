@@ -3,13 +3,12 @@
 
 #include "lexer.h"
 
+// Parser use type pruning
+
 // This is to test keyword ascpl
 // delete after done
 #include "keywords.h"
 #include "s-umap.h"
-
-
-
 
 char *file_to_str(const char *fp)
 {

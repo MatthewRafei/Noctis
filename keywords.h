@@ -39,4 +39,6 @@
     KEYWORD_RET \
 }
 
+int is_keyword(const char *s);
+
 #endif // KEYWORDS_H

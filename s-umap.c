@@ -97,7 +97,6 @@ void s_umap_insert(struct S_Umap *map, char *key, void *value)
     }
     node_free(it);
   }
-  // Maybe this isnt right
   map->tbl.len += 1;
 }
 
@@ -109,20 +108,25 @@ void s_umap_free(struct S_Umap *map)
   assert(0 && "unimplemented");
 }
 
-int s_umap_search(const struct S_Umap *map, char* key)
+void *s_umap_get(const struct S_Umap *map, char *key)
 {
-  
-  printf("What is key: %s\n", key);
-  
-  uint64_t hash = map->hash(key);
-  uint32_t index = hash % map->tbl.cap;
-  
-  if(map->tbl.nodes[index]){
-    return 1;
+  unsigned long idx = map->hash(key) % map->tbl.cap;
+
+  struct _S_Umap_Node *it = map->tbl.nodes[idx];
+
+  while (it) {
+    if (!strcmp(it->key, key)) {
+      return it->value;
+    }
+    it = it->next;
   }
-  else{
-    return 0;
-  }
+
+  return NULL;
+}
+
+int s_umap_contains(const struct S_Umap *map, char *key)
+{
+  return s_umap_get(map, key) != NULL;
 }
 
 /*
@@ -138,8 +142,8 @@ void s_umap_print(struct S_Umap *map)
       struct _S_Umap_Node *tmp = map->tbl.nodes[i];
       printf("Keys for nodes[%d]: ", i);
       while(tmp){
-	printf("\"%s\" -> ", tmp->key);
-	tmp = tmp->next;
+        printf("\"%s\" -> ", tmp->key);
+        tmp = tmp->next;
       }
       printf("NULL\n");
     }
