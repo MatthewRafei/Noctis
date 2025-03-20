@@ -154,7 +154,6 @@ void s_umap_print(struct S_Umap *map, void (*vp)(const void *))
           printf(")\n");
         }
       }
-      //printf("NULL\n");
     }
   }
 }

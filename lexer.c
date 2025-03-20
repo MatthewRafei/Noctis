@@ -117,9 +117,11 @@ int is_identifier(int c)
 enum Token_Type *determine_symbol(const char *s, size_t op_len, struct S_Umap *sym_keyword_tbl, size_t *actual_len)
 {
   *actual_len = 0;
+
+  // Fix this with dynamically allocated 
   char buf[256] = {0};
   strncpy(buf, s, op_len);
-
+  
   for (int i = (int)op_len-1; i >= 0; --i) {
     if (s_umap_contains(sym_keyword_tbl, buf)) {
       *actual_len = (size_t)i+1;

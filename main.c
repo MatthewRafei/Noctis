@@ -50,7 +50,7 @@ char *file_to_str(const char *fp)
 
 void help(void)
 {
-  printf("Usage: pinky <filepath>\n");
+  printf("Usage: noctis <filepath>\n");
   exit(1);
 }
 
@@ -60,7 +60,6 @@ int main(int argc, char *argv[])
     help();
   }
 
-
   const char *fp = argv[1];
   char *src = file_to_str(fp);
 
@@ -68,6 +67,5 @@ int main(int argc, char *argv[])
   lexer_dump(&lexer);
 
   free(src);
-
   return 0;
 }

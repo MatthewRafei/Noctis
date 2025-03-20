@@ -1,22 +1,108 @@
--- Single-line comment
+-- this Single-line comment
+
+-- Import
+import math;
+import math::{add, PI};
+
+-- Public function
+export func add(a: int, b: int) -> int {
+    return a + b;
+}
+
+-- Immutable by default
+-- Mutable when using mut
+func modify(mut x: int) -> void {
+    x = x + 1;  -- Modifies caller's variable
+}
+
+-----------------------
+-- Memory management --
+-----------------------
+
+-- Ownership Transfer
+func main() -> unit {
+    let s: string = "hello";
+    takes_ownership(s);  -- `s` is moved, no longer valid here
+    print(s); -- ERROR: `s` was moved
+}
+
+func takes_ownership(s: string) -> unit {
+    print(s);  -- `s` is freed at end of scope
+}
+
+-------------------------------------------
+-- Borrowing (References Without Moving) --
+-------------------------------------------
+func main() -> unit {
+    let s: string = "hello";
+    print_length(&s);  -- Borrowing, `s` still valid
+    print(s);          -- Allowed, `s` wasn't moved
+}
+
+func print_length(s: &string) -> unit {
+    print(size(s));  -- Can read, but not modify
+}
+
+------------------------------------------------
+-- Mutable Borrowing (Exclusive Modification) -- 
+------------------------------------------------
+
+-- Only one mutable reference (&mut) is allowed at a time:
 
 func main() -> unit {
+    let mut s: string = "hello";
+    to_uppercase(&mut s);  -- Pass by mutable reference
+    print(s);  -- `s` modified safely
+}
 
-    let i: int = 1;
-    i := 3; -- Reassigning variable
+func to_uppercase(s: &mut string) -> unit {
+    s = uppercase(s);  -- Modify in place
+}
 
-    if expr: bool {
+----------------------------------------------
+-- Race conditions avoided & safe mutations --
+----------------------------------------------
+
+-- Error if multiple mutable borrows exist at the same time:
+let x: &mut string = &mut s;
+let y: &mut string = &mut s;  -- ERROR: Cannot borrow `s` mutably more than once
+
+-------------------------
+-- Returning Ownership --
+-------------------------
+
+func create_message() -> string {
+    return "hello";  -- Ownership transferred to caller
+}
+
+func main() -> unit {
+    let msg: string = create_message();  -- Caller owns `msg`
+}
+
+-------------------------------------------------------------------------
+
+-- Default parameters
+func greet(name: string = "Guest") -> void {
+    print("Hello, " + name);
+}
+
+-- Private function (Only one `main()` function now)
+func main() -> unit {
+    let mut i: int = 1;
+    i = 3; -- Reassigning variable
+
+    if expr {
         -- do something
     }
     else {
-    return expr;
+        return expr;
     }
     
-    while expr: bool {
+    while expr {
         -- do something
     }
     
-    for let i: int = 1; i < size; i += 1 {
+    for i in 1..size {
         -- do something
     }
 }
