@@ -25,13 +25,15 @@ enum Token_Type {
   TOKEN_NOT,       // ~
   TOKEN_GT,        // >
   TOKEN_LT,        // <
+  TOKEN_SCOLON,    // ;
+  TOKEN_AND,       // &
 
   // Multi-character tokens
   TOKEN_GE,        // >=
   TOKEN_LE,        // <=
   TOKEN_NE,        // ~=
   TOKEN_EQ,        // ==
-  TOKEN_ASSIGN,    // :=
+  TOKEN_ASSIGN,    // =
   TOKEN_GTGT,      // >>
   TOKEN_LTLT,      // <<
   TOKEN_SYMBOL_LEN, // DO NOT USE
@@ -42,7 +44,6 @@ enum Token_Type {
   TOKEN_ELSE,
   TOKEN_TRUE,
   TOKEN_FALSE,
-  TOKEN_AND,
   TOKEN_OR,
   TOKEN_WHILE,
   TOKEN_DO,

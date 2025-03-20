@@ -100,6 +100,8 @@ char *enum_to_str(enum Token_Type type) {
       return "TOKEN_PRINTLN";
     case TOKEN_RET:
       return "TOKEN_RET";
+    case TOKEN_SCOLON:
+      return "TOKEN_SCOLON";
     // We will have to remember this is here
     default:
       return "UNKNOWN_TOKEN";

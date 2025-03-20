@@ -15,20 +15,21 @@ static struct S_Umap init_sym_keyword_tbl(void) {
   struct S_Umap tbl = s_umap_create(fnv1a, sizeof(enum Token_Type));
 
   char *syms[] = {
-    "(", ")",           // TOKEN_LPAREN, TOKEN_RPAREN
-    "{", "}",           // TOKEN_LCURLY, TOKEN_RCURLY
-    "[", "]",           // TOKEN_LSQUAR, TOKEN_RSQUAR
-    ",", ".",           // TOKEN_COMMA, TOKEN_DOT
-    "+", "-",           // TOKEN_PLUS, TOKEN_MINUS
-    "*", "/",           // TOKEN_STAR, TOKEN_SLASH
-    "^", "%",           // TOKEN_CARET, TOKEN_MOD
-    ":", "?",           // TOKEN_COLON, TOKEN_QUESTION
-    "~",                // TOKEN_NOT
-    ">", "<",           // TOKEN_GT, TOKEN_LT
-    ">=", "<=",         // TOKEN_GE, TOKEN_LE
-    "~=", "==",         // TOKEN_NE, TOKEN_EQ
-    ":=",               // TOKEN_ASSIGN
-    ">>", "<<",         // TOKEN_GTGT, TOKEN_LTLT
+    "(",  ")",           // TOKEN_LPAREN, TOKEN_RPAREN
+    "{",  "}",           // TOKEN_LCURLY, TOKEN_RCURLY
+    "[",  "]",           // TOKEN_LSQUAR, TOKEN_RSQUAR
+    ",",  ".",           // TOKEN_COMMA, TOKEN_DOT
+    "+",  "-",           // TOKEN_PLUS, TOKEN_MINUS
+    "*",  "/",           // TOKEN_STAR, TOKEN_SLASH
+    "^",  "%",           // TOKEN_CARET, TOKEN_MOD
+    ":",  "?",           // TOKEN_COLON, TOKEN_QUESTION
+    "~",                 // TOKEN_NOT
+    ">",  "<",           // TOKEN_GT, TOKEN_LT
+    ">=", "<=",          // TOKEN_GE, TOKEN_LE
+    "~=", "=",           // TOKEN_NE, TOKEN_EQ
+    ":=",                // TOKEN_ASSIGN
+    ">>", "<<",          // TOKEN_GTGT, TOKEN_LTLT
+    ";",  "&",           // TOKEN_SCOLON, TOKEN_AND
   };
 
   for (size_t i = 0; i < (sizeof(syms)/sizeof(*syms)); ++i) {
@@ -37,8 +38,15 @@ static struct S_Umap init_sym_keyword_tbl(void) {
   
   // Keywords
   char *kws[] = KEYWORD_ASCPL;
+
+  for (size_t i = 0; i < (sizeof(syms)/sizeof(*syms)); ++i) {
+    printf("Symbol: %s -> Token: %d\n", syms[i], *(enum Token_Type *)s_umap_get(&tbl, syms[i]));
+  }
+  for (size_t i = 0; i < sizeof(kws)/sizeof(*kws); ++i) {
+    printf("Keyword: %s -> Token: %d\n", kws[i], *(enum Token_Type *)s_umap_get(&tbl, kws[i]));
+  }
   
-  assert(sizeof(kws)/sizeof(*kws) == (TOKEN_KEYWORD_LEN - TOKEN_SYMBOL_LEN) - 1);
+  assert(sizeof(kws)/sizeof(*kws) == (TOKEN_KEYWORD_LEN - TOKEN_SYMBOL_LEN));
   
   for (size_t i = 0; i < sizeof(kws)/sizeof(*kws); ++i) {
    /*
