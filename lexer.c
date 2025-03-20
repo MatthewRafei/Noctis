@@ -6,7 +6,7 @@
 
 #include "lexer.h"
 #include "keywords.h"
-#include "s-umap.h"
+#include "ds/s-umap.h"
 #include "token.h"
 #include "utils.h"
 #include "fnv-1a.h"
@@ -119,15 +119,6 @@ enum Token_Type *determine_symbol(const char *s, size_t op_len, struct S_Umap *s
   *actual_len = 0;
   char buf[256] = {0};
   strncpy(buf, s, op_len);
-
-  // struct {
-  //   char *data;
-  //   size_t len, cap;
-  // } buf = {
-  //   .data = NULL,
-  //   .len = 0,
-  //   .cap = 0,
-  // }
 
   for (int i = (int)op_len-1; i >= 0; --i) {
     if (s_umap_contains(sym_keyword_tbl, buf)) {
