@@ -16,7 +16,7 @@
 #define KEYWORD_END "end"
 #define KEYWORD_PRINT "print"
 #define KEYWORD_PRINTLN "println"
-#define KEYWORD_RET "ret"
+#define KEYWORD_RET "return"
 
 // Keyword as compound literal 
 // We can make an array of keywords

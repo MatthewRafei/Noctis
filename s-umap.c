@@ -6,7 +6,7 @@
 #include <stdint.h>
 #include <string.h>
 
-#include "s-umap.h"
+#include "ds/s-umap.h"
 #include "token.h"
 #include "utils.h"
 #include "fnv-1a.h"
@@ -154,7 +154,6 @@ void s_umap_print(struct S_Umap *map, void (*vp)(const void *))
           printf(")\n");
         }
       }
-      //printf("NULL\n");
     }
   }
 }

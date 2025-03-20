@@ -1,1 +1,1 @@
-# PinkyInC
+# The Noctis Programming Language
