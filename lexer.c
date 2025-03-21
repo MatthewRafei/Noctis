@@ -25,11 +25,11 @@ static struct S_Umap init_sym_keyword_tbl(void) {
     ":",  "?",           // TOKEN_COLON, TOKEN_QUESTION
     "~",                 // TOKEN_NOT
     ">",  "<",           // TOKEN_GT, TOKEN_LT
+    ";", "&",          // TOKEN_SCOLON, TOKEN_AND
     ">=", "<=",          // TOKEN_GE, TOKEN_LE
     "~=", "=",           // TOKEN_NE, TOKEN_EQ
     ":=",                // TOKEN_ASSIGN
-    ">>", "<<",          // TOKEN_GTGT, TOKEN_LTLT
-    ";",  "&",           // TOKEN_SCOLON, TOKEN_AND
+    ">>", "<<",          // TOKEN_GTGT, TOKEN_LTLT          
   };
 
   for (size_t i = 0; i < (sizeof(syms)/sizeof(*syms)); ++i) {
@@ -39,25 +39,27 @@ static struct S_Umap init_sym_keyword_tbl(void) {
   // Keywords
   char *kws[] = KEYWORD_ASCPL;
 
-  for (size_t i = 0; i < (sizeof(syms)/sizeof(*syms)); ++i) {
+  /*
+    for (size_t i = 0; i < (sizeof(syms)/sizeof(*syms)); ++i) {
     printf("Symbol: %s -> Token: %d\n", syms[i], *(enum Token_Type *)s_umap_get(&tbl, syms[i]));
-  }
-  for (size_t i = 0; i < sizeof(kws)/sizeof(*kws); ++i) {
+    }
+    for (size_t i = 0; i < sizeof(kws)/sizeof(*kws); ++i) {
     printf("Keyword: %s -> Token: %d\n", kws[i], *(enum Token_Type *)s_umap_get(&tbl, kws[i]));
-  }
+    }
+  */
   
-  assert(sizeof(kws)/sizeof(*kws) == (TOKEN_KEYWORD_LEN - TOKEN_SYMBOL_LEN));
+  assert(sizeof(kws)/sizeof(*kws) == (TOKEN_KEYWORD_LEN - TOKEN_SYMBOL_LEN) - 1);
   
   for (size_t i = 0; i < sizeof(kws)/sizeof(*kws); ++i) {
-   /*
+    /*
       Because s_umap_insert() takes void * as the value, we need to
       get the appropriate Token_Type that matches up with the appropriate
       keyword (see keywords.h) and making a variable in-place and taking
       the address of it to pass to s_umap_insert.
       The i+(int)TOKEN_SYMBOL_LEN+1 is for making
       sure we are "indexing" the Token_Type enum correctly.
-   */
-   // Might be compiler specific because of compound literal lifetimes
+    */
+    // Might be compiler specific because of compound literal lifetimes
     s_umap_insert(&tbl, kws[i], (void*)&(enum Token_Type){(enum Token_Type)(i+(int)TOKEN_SYMBOL_LEN+1)});
   }
   
@@ -224,7 +226,7 @@ struct Lexer lex_file(char *src, const char *fp)
     else if (ch == '"' || ch == '\'') {
       i += 1, col += 1; // " or '
       size_t len = consume_while(src+i, not_quote);
-      struct Token *t = token_alloc(TOKEN_STRING, src+i, len, fp, row, col);
+      struct Token *t = token_alloc(TOKEN_STRING_LIT, src+i, len, fp, row, col);
       lexer_append(&lexer, t);
       i += len + 1, col += len + 1; // " or ' + length of string
     }
