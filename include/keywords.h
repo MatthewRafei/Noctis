@@ -12,17 +12,20 @@
 #define KEYWORD_FOR     "for"
 #define KEYWORD_FUNC    "func"
 #define KEYWORD_NULL    "NULL"
-#define KEYWORD_END     "end"
-#define KEYWORD_PRINT   "print"
 #define KEYWORD_RETURN  "return"
 #define KEYWORD_IMPORT  "import"
+#define KEYWORD_EXPORT  "export"
 #define KEYWORD_FLOAT   "float"
 #define KEYWORD_INT     "int"
 #define KEYWORD_CHAR    "char"
 #define KEYWORD_STRING  "string"
+#define KEYWORD_UNIT    "unit"
+#define KEYWORD_LET     "let"
+#define KEYWORD_MUT     "mut"
 
 // Keyword as compound literal 
 // We can make an array of keywords
+// Dont forget a comma. It will fail the assert
 #define KEYWORD_ASCPL {				\
     KEYWORD_IF,					\
     KEYWORD_THEN,				\
@@ -35,17 +38,16 @@
     KEYWORD_FOR,				\
     KEYWORD_FUNC,				\
     KEYWORD_NULL,				\
-    KEYWORD_END,				\
-    KEYWORD_PRINT,				\
     KEYWORD_RETURN,				\
     KEYWORD_IMPORT,				\
+    KEYWORD_EXPORT,				\
     KEYWORD_FLOAT,				\
     KEYWORD_INT,				\
     KEYWORD_CHAR,				\
-    KEYWORD_STRING				\
+    KEYWORD_STRING,				\
+    KEYWORD_UNIT,				\
+    KEYWORD_LET,				\
+    KEYWORD_MUT, 				\
 }
-
-
-int is_keyword(const char *s);
 
 #endif // KEYWORDS_H

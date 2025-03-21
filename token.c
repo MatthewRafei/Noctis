@@ -64,8 +64,8 @@ char *enum_to_str(enum Token_Type type) {
     return "TOKEN_IDENTIFIER";
   case TOKEN_STRING:
     return "TOKEN_STRING";
-  case TOKEN_INTEGER:
-    return "TOKEN_INTEGER";
+  case TOKEN_INT:
+    return "TOKEN_INT";
   case TOKEN_FLOAT:
     return "TOKEN_FLOAT";
   case TOKEN_IF:
@@ -92,22 +92,35 @@ char *enum_to_str(enum Token_Type type) {
     return "TOKEN_FUNC";
   case TOKEN_NULL:
     return "TOKEN_NULL";
-  case TOKEN_END:
-    return "TOKEN_END";
-  case TOKEN_PRINT:
-    return "TOKEN_PRINT";
   case TOKEN_RETURN:
     return "TOKEN_RETURN";
   case TOKEN_SCOLON:
     return "TOKEN_SEMICOLON";
   case TOKEN_IMPORT:
     return "TOKEN_IMPORT";
+  case TOKEN_EXPORT:
+    return "TOKEN_EXPORT";
   case TOKEN_FLOAT_LIT:
     return "TOKEN_FLOAT_LIT";
+  case TOKEN_INT_LIT:
+    return "TOKEN_INT_LIT";
+  case TOKEN_STRING_LIT:
+    return "TOKEN_STRING_LIT";
+  case TOKEN_UNIT:
+    return "TOKEN_UNIT";
+  case TOKEN_LET:
+    return "TOKEN_LET";
+  case TOKEN_MUT:
+    return "TOKEN_MUT";
+    
+
+
+
+    
+  default:
     // GCC will complain 'TOKEN_SYMBOL_LEN'
     // and 'TOKEN_KEYWORD_LEN' are not accounted
-  default:
-    return "UNKNOWN_TOKEN";
+    return "UNKNOWN_TOKEN or you forgot to add it to enum_to_str";
   }
 }
 
@@ -127,13 +140,7 @@ struct Token *token_alloc(enum Token_Type type,
 
   return token;
 }
-/*
-void token_dump(const struct Token *t)
-{
-  printf("[lexeme: %s, \t\ttype: %s, \tfilepath: %s, \trow: %zu, col: %zu]\n",
-	 t->lexeme, enum_to_str(t->type), t->fp, t->row, t->col);
-}
-*/
+
 void token_dump(const struct Token *t)
 {
     printf("[lexeme: %-20s \t type: %-20s \t filepath: %-30s \t row: %-3zu \t col: %-3zu]\n",
