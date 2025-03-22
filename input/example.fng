@@ -13,7 +13,7 @@ export func add(a: int, b: int) -> int {
 }
 
 -- Function with a default parameter
-func greet(name: string = "Guest") -> void {
+func greet(name: string = "Guest") -> unit {
     print("Hello, " + name);
 }
 
@@ -23,17 +23,17 @@ func compute_area(radius: float) -> float {
 }
 
 -- Function demonstrating mutable borrowing to update a message
-func update_message(s: &mut string) -> void {
+func update_message(s: &mut string) -> unit {
     s = uppercase(s);
 }
 
 -- Takes ownership of the passed string
-func takes_ownership(s: string) -> void {
+func takes_ownership(s: string) -> unit {
     print("Took ownership: " + s);
 }
 
 -- Borrows a string immutably to print its length
-func print_length(s: &string) -> void {
+func print_length(s: &string) -> unit {
     print("Length: " + to_string(size(s)));
 }
 
@@ -47,6 +47,13 @@ func main() -> unit {
     -- Using default parameters and explicit parameters
     greet();               -- Prints "Hello, Guest"
     greet("Alice");        -- Prints "Hello, Alice"
+    
+    let x: int = 1;
+    let y: int = 2;
+    
+    if x == y {
+    	print("They are the same");
+    }
 
     -- Using the public add function
     let sum: int = add(5, 7);

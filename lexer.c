@@ -25,42 +25,54 @@ static struct S_Umap init_sym_keyword_tbl(void) {
     ":",  "?",           // TOKEN_COLON, TOKEN_QUESTION
     "~",                 // TOKEN_NOT
     ">",  "<",           // TOKEN_GT, TOKEN_LT
-    ">=", "<=",          // TOKEN_GE, TOKEN_LE
-    "~=", "=",           // TOKEN_NE, TOKEN_EQ
-    ":=",                // TOKEN_ASSIGN
-    ">>", "<<",          // TOKEN_GTGT, TOKEN_LTLT
     ";",  "&",           // TOKEN_SCOLON, TOKEN_AND
+    ">=", "<=",          // TOKEN_GE, TOKEN_LE
+    "~=", "==",           // TOKEN_NE, TOKEN_EQ
+    "=",                 // TOKEN_ASSIGN
+    ">>", "<<",          // TOKEN_GTGT, TOKEN_LTLT
   };
 
-  for (size_t i = 0; i < (sizeof(syms)/sizeof(*syms)); ++i) {
-    s_umap_insert(&tbl, syms[i], (void*)&(enum Token_Type){(enum Token_Type)i});
+  for (size_t i = 0; i < (sizeof(syms) / sizeof(*syms)); ++i) {
+    // Create a named variable to hold the Token_Type
+    enum Token_Type token = (enum Token_Type)i;
+    s_umap_insert(&tbl, syms[i], (void*)&token);
   }
-  
+
   // Keywords
   char *kws[] = KEYWORD_ASCPL;
 
   for (size_t i = 0; i < (sizeof(syms)/sizeof(*syms)); ++i) {
-    printf("Symbol: %s -> Token: %d\n", syms[i], *(enum Token_Type *)s_umap_get(&tbl, syms[i]));
+    printf("Symbol: %s -> Token: %d\n",
+	   syms[i],
+	   *(enum Token_Type *)s_umap_get(&tbl, syms[i]));
   }
+  printf("\n");
+
+  assert(sizeof(kws)/sizeof(*kws) == (TOKEN_KEYWORD_LEN - TOKEN_SYMBOL_LEN) - 1);
+
   for (size_t i = 0; i < sizeof(kws)/sizeof(*kws); ++i) {
-    printf("Keyword: %s -> Token: %d\n", kws[i], *(enum Token_Type *)s_umap_get(&tbl, kws[i]));
+    /*
+      Because s_umap_insert() takes void* as the value, we need to create a variable of 
+      the appropriate Token_Type to match the keyword. Since the compound literal used
+      in the original code would be temporary and could lead to undefined behavior,
+      we create a variable `token` to hold the value.
+      This ensures the pointer remains valid
+      for the duration of the `s_umap_insert()` call.
+
+      The addition of `+1` and the `i + (int)TOKEN_SYMBOL_LEN` ensures that we're 
+      correctly indexing into the Token_Type enum for the corresponding keyword.
+    */
+    enum Token_Type token = (enum Token_Type)(i + (int)TOKEN_SYMBOL_LEN) + 1;
+    s_umap_insert(&tbl, kws[i], (void*)&token);
   }
-  
-  assert(sizeof(kws)/sizeof(*kws) == (TOKEN_KEYWORD_LEN - TOKEN_SYMBOL_LEN));
-  
+
   for (size_t i = 0; i < sizeof(kws)/sizeof(*kws); ++i) {
-   /*
-      Because s_umap_insert() takes void * as the value, we need to
-      get the appropriate Token_Type that matches up with the appropriate
-      keyword (see keywords.h) and making a variable in-place and taking
-      the address of it to pass to s_umap_insert.
-      The i+(int)TOKEN_SYMBOL_LEN+1 is for making
-      sure we are "indexing" the Token_Type enum correctly.
-   */
-   // Might be compiler specific because of compound literal lifetimes
-    s_umap_insert(&tbl, kws[i], (void*)&(enum Token_Type){(enum Token_Type)(i+(int)TOKEN_SYMBOL_LEN+1)});
+    printf("Keyword: %s -> Token: %d\n",
+           kws[i],
+           *(enum Token_Type *)s_umap_get(&tbl, kws[i])
+    );
   }
-  
+  printf("\n");
   return tbl;
 }
 
@@ -84,9 +96,12 @@ void lexer_dump(const struct Lexer *l)
   }
 }
 
-// consume_while returns a counter to the number of indexes
-// we need to skip ahead until the while loop is broken by the predicate.
-// Predicate being a function pointer.
+/*
+  consume_while returns a counter to the number of indexes
+  we need to skip ahead until the while loop is broken by the predicate.
+  Predicate being a function pointer that
+  returns a character, escape seq, or something we want to stop at
+*/
 size_t consume_while(char *s, int (*pred)(int))
 {
   size_t counter = 0;
@@ -122,7 +137,10 @@ int is_identifier(int c)
   return isalnum(c) || c == '_';
 }
 
-enum Token_Type *determine_symbol(const char *s, size_t op_len, struct S_Umap *sym_keyword_tbl, size_t *actual_len)
+enum Token_Type *determine_symbol(const char *s,
+				  size_t op_len,
+				  struct S_Umap *sym_keyword_tbl,
+				  size_t *actual_len)
 {
   *actual_len = 0;
 
@@ -222,22 +240,48 @@ struct Lexer lex_file(char *src, const char *fp)
 
     // TODO: Make it so that character literals are their own thing.
     else if (ch == '"' || ch == '\'') {
+      
       i += 1, col += 1; // " or '
+      
       size_t len = consume_while(src+i, not_quote);
-      struct Token *t = token_alloc(TOKEN_STRING, src+i, len, fp, row, col);
+      
+      struct Token *t = token_alloc(TOKEN_STRING_LIT, src+i, len, fp, row, col);
+      
       lexer_append(&lexer, t);
+      
       i += len + 1, col += len + 1; // " or ' + length of string
     }
+    //////////////////////////////////////////////////////////////////////////////////////////
+    // Numbers
 
-    // Numbers (floats unimplemented)
-    else if(isdigit(ch)) {
-      size_t len = consume_while(src + i, isdigit);
-
-      struct Token *t = token_alloc(TOKEN_INTEGER, src+i, len, fp, row, col);
-      lexer_append(&lexer, t);
-      i += len, col += len;
+    else if(isdigit(ch) || (ch == '.' && src[i+1] && isdigit(src[i+1]))){
+      
+      if(ch == '.'){
+	size_t len = consume_while(src+i+1, isdigit);
+	struct Token *t = token_alloc(TOKEN_FLOAT_LIT, src+i, len+1, fp, row, col);
+	lexer_append(&lexer, t);
+	len += 1;
+	i += len, col += len;
+      }
+      else if(isdigit(ch)){
+	size_t len = consume_while(src+i, isdigit);
+	if(SAFE_PEEK(src, i+len, '.')){
+	  len += consume_while(src+i+len+1, isdigit);
+	  struct Token *t = token_alloc(TOKEN_FLOAT_LIT, src+i, len+1, fp, row, col);
+	  lexer_append(&lexer, t);
+	  len += 1;
+	  i += len, col += len;
+	}
+	else{
+	  struct Token *t = token_alloc(TOKEN_INT_LIT, src+i, len, fp, row, col);
+	  lexer_append(&lexer, t);
+	  i += len, col += len;
+	}
+      }
     }
 
+    
+    /////////////////////////////////////////////////////////////////////////////////////////
     // Operators
     else {
       size_t op_len = consume_while(src + i, not_sym);
@@ -245,7 +289,7 @@ struct Lexer lex_file(char *src, const char *fp)
       enum Token_Type *type = determine_symbol(src+i, op_len, &sym_keyword_tbl, &len);
 
       if (!type) {
-        err_wargs("invalid type at: %s", src+i);
+        err_wargs("invalid type at: %s\n", src);
       }
 
       struct Token *t = token_alloc(*type, src + i, len, fp, row, col);
