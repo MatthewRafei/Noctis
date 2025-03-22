@@ -29,7 +29,7 @@ static struct S_Umap init_sym_keyword_tbl(void) {
     ">=", "<=",          // TOKEN_GE, TOKEN_LE
     "~=", "==",           // TOKEN_NE, TOKEN_EQ
     "=",                 // TOKEN_ASSIGN
-    ">>", "<<",          // TOKEN_GTGT, TOKEN_LTLT          
+    ">>", "<<",          // TOKEN_GTGT, TOKEN_LTLT
   };
 
   for (size_t i = 0; i < (sizeof(syms) / sizeof(*syms)); ++i) {
@@ -37,19 +37,19 @@ static struct S_Umap init_sym_keyword_tbl(void) {
     enum Token_Type token = (enum Token_Type)i;
     s_umap_insert(&tbl, syms[i], (void*)&token);
   }
-  
+
   // Keywords
   char *kws[] = KEYWORD_ASCPL;
-  
+
   for (size_t i = 0; i < (sizeof(syms)/sizeof(*syms)); ++i) {
     printf("Symbol: %s -> Token: %d\n",
 	   syms[i],
 	   *(enum Token_Type *)s_umap_get(&tbl, syms[i]));
-  } 
+  }
   printf("\n");
 
   assert(sizeof(kws)/sizeof(*kws) == (TOKEN_KEYWORD_LEN - TOKEN_SYMBOL_LEN) - 1);
-  
+
   for (size_t i = 0; i < sizeof(kws)/sizeof(*kws); ++i) {
     /*
       Because s_umap_insert() takes void* as the value, we need to create a variable of 
@@ -58,18 +58,19 @@ static struct S_Umap init_sym_keyword_tbl(void) {
       we create a variable `token` to hold the value.
       This ensures the pointer remains valid
       for the duration of the `s_umap_insert()` call.
-  
+
       The addition of `+1` and the `i + (int)TOKEN_SYMBOL_LEN` ensures that we're 
       correctly indexing into the Token_Type enum for the corresponding keyword.
     */
     enum Token_Type token = (enum Token_Type)(i + (int)TOKEN_SYMBOL_LEN) + 1;
     s_umap_insert(&tbl, kws[i], (void*)&token);
   }
-  
+
   for (size_t i = 0; i < sizeof(kws)/sizeof(*kws); ++i) {
     printf("Keyword: %s -> Token: %d\n",
-	   kws[i],
-	   *(enum Token_Type *)s_umap_get(&tbl, kws[i]));
+           kws[i],
+           *(enum Token_Type *)s_umap_get(&tbl, kws[i])
+    );
   }
   printf("\n");
   return tbl;
@@ -239,33 +240,48 @@ struct Lexer lex_file(char *src, const char *fp)
 
     // TODO: Make it so that character literals are their own thing.
     else if (ch == '"' || ch == '\'') {
+      
       i += 1, col += 1; // " or '
+      
       size_t len = consume_while(src+i, not_quote);
+      
       struct Token *t = token_alloc(TOKEN_STRING_LIT, src+i, len, fp, row, col);
+      
       lexer_append(&lexer, t);
+      
       i += len + 1, col += len + 1; // " or ' + length of string
     }
+    //////////////////////////////////////////////////////////////////////////////////////////
+    // Numbers
 
-    // Numbers (floats unimplemented)
-    else if(isdigit(ch)) {
+    else if(isdigit(ch) || (ch == '.' && src[i+1] && isdigit(src[i+1]))){
       
-      size_t len = consume_while(src + i, isdigit);
-      
-      if(SAFE_PEEK(src, i+len, '.')){
-	len += consume_while(src+i+len+1, isdigit);
-	struct Token *t = token_alloc(TOKEN_FLOAT_LIT, src+i, len, fp, row, col);
+      if(ch == '.'){
+	size_t len = consume_while(src+i+1, isdigit);
+	struct Token *t = token_alloc(TOKEN_FLOAT_LIT, src+i, len+1, fp, row, col);
 	lexer_append(&lexer, t);
-	
+	len += 1;
+	i += len, col += len;
       }
-      else{
-	struct Token *t = token_alloc(TOKEN_INT_LIT, src+i, len, fp, row, col);
-	lexer_append(&lexer, t);
+      else if(isdigit(ch)){
+	size_t len = consume_while(src+i, isdigit);
+	if(SAFE_PEEK(src, i+len, '.')){
+	  len += consume_while(src+i+len+1, isdigit);
+	  struct Token *t = token_alloc(TOKEN_FLOAT_LIT, src+i, len+1, fp, row, col);
+	  lexer_append(&lexer, t);
+	  len += 1;
+	  i += len, col += len;
+	}
+	else{
+	  struct Token *t = token_alloc(TOKEN_INT_LIT, src+i, len, fp, row, col);
+	  lexer_append(&lexer, t);
+	  i += len, col += len;
+	}
       }
-      
-      
-      i += len, col += len;
     }
 
+    
+    /////////////////////////////////////////////////////////////////////////////////////////
     // Operators
     else {
       size_t op_len = consume_while(src + i, not_sym);
