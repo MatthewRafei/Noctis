@@ -251,37 +251,40 @@ struct Lexer lex_file(char *src, const char *fp)
       
       i += len + 1, col += len + 1; // " or ' + length of string
     }
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Numbers
-
-    else if(isdigit(ch) || (ch == '.' && src[i+1] && isdigit(src[i+1]))){
-      
-      if(ch == '.'){
-	size_t len = consume_while(src+i+1, isdigit);
-	struct Token *t = token_alloc(TOKEN_FLOAT_LIT, src+i, len+1, fp, row, col);
-	lexer_append(&lexer, t);
-	len += 1;
-	i += len, col += len;
+    ////////////////////////////////////////////////////////////////////////////////////
+    // Numbers & for loop ranges
+    else if(isdigit(ch)){
+      size_t len = consume_while(src+i, isdigit);
+      if (SAFE_PEEK(src, i + len, '.') && !SAFE_PEEK(src, i + len + 1, '.')) {
+        // We found a decimal point followed by a digit -> It's a float!
+        len += 1;  // Account for the decimal point
+        len += consume_while(src + i + len, isdigit);  // Consume decimal part
+        struct Token *t = token_alloc(TOKEN_FLOAT_LIT, src + i, len, fp, row, col);
+        lexer_append(&lexer, t);
+        i += len, col += len;
       }
-      else if(isdigit(ch)){
-	size_t len = consume_while(src+i, isdigit);
-	if(SAFE_PEEK(src, i+len, '.')){
-	  len += consume_while(src+i+len+1, isdigit);
-	  struct Token *t = token_alloc(TOKEN_FLOAT_LIT, src+i, len+1, fp, row, col);
-	  lexer_append(&lexer, t);
-	  len += 1;
-	  i += len, col += len;
-	}
-	else{
-	  struct Token *t = token_alloc(TOKEN_INT_LIT, src+i, len, fp, row, col);
-	  lexer_append(&lexer, t);
-	  i += len, col += len;
-	}
+      else{
+	struct Token *t = token_alloc(TOKEN_INT_LIT, src+i, len, fp, row, col);
+	lexer_append(&lexer, t);
+	i += len, col += len;
       }
     }
 
+
+    else if(ch == '.' && SAFE_PEEK(src, i+1, '.')){
+      struct Token *t = token_alloc(TOKEN_FOR_RANGE, src+i, 2, fp, row, col);
+      lexer_append(&lexer, t);
+      i += 2; col += 2;
+    }
+      
+    else if(ch == '.' && src[i+1] && isdigit(src[i+1])){
+      size_t len = consume_while(src+i+1, isdigit);
+      struct Token *t = token_alloc(TOKEN_FLOAT_LIT, src+i, len, fp, row, col);
+      lexer_append(&lexer, t);
+      i += len, col += 2;
+    }
     
-    /////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////////////
     // Operators
     else {
       size_t op_len = consume_while(src + i, not_sym);

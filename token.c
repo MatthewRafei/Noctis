@@ -112,11 +112,10 @@ char *enum_to_str(enum Token_Type type) {
     return "TOKEN_LET";
   case TOKEN_MUT:
     return "TOKEN_MUT";
-    
-
-
-
-    
+  case TOKEN_IN:
+    return "TOKEN_IN";
+  case TOKEN_FOR_RANGE:
+    return "TOKEN_FOR_RANGE";    
   default:
     // GCC will complain 'TOKEN_SYMBOL_LEN'
     // and 'TOKEN_KEYWORD_LEN' are not accounted

@@ -36,7 +36,8 @@ enum Token_Type {
   TOKEN_ASSIGN,    // =
   TOKEN_GTGT,      // >>
   TOKEN_LTLT,      // <<
-  TOKEN_SYMBOL_LEN, // DO NOT USE
+  TOKEN_FOR_RANGE, // {num}..{num}
+  TOKEN_SYMBOL_LEN,// DO NOT USE
 
   // Keywords
   TOKEN_IF,
@@ -60,6 +61,7 @@ enum Token_Type {
   TOKEN_UNIT,
   TOKEN_LET,
   TOKEN_MUT,
+  TOKEN_IN,
   TOKEN_KEYWORD_LEN, // DO NOT USE
 
   // Literals
