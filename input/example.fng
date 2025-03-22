@@ -55,6 +55,11 @@ func main() -> unit {
     	print("They are the same");
     }
 
+
+    let float_number: float = 333333333333.33333333333333;
+    let float_number_2: float = .33333333333333333
+    let float_number_3: float = 12223232.
+
     -- Using the public add function
     let sum: int = add(5, 7);
     print("Sum: " + to_string(sum));
