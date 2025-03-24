@@ -21,14 +21,13 @@ unsigned long fnv1a(const char* key)
 
   // FNV-1a offset basis
   unsigned long hash = 2166136261;
-
+  // strlen ensures that the string is null-terminated. So checking for it is redundant
   int length = strlen(key);
-
-  if (key[length] != '\0') {
-    printf("Error: String is not properly null-terminated\n");
-    exit(1);
+  
+  if (length == 0) {
+    return 2166136261; // Return offset basis for empty string
   }
-
+  
   /*  
     There is the edge case that an empty string "" is given
     by design FNV-1a returns the offset basis. We could handle this differently

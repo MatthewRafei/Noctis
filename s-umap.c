@@ -102,10 +102,16 @@ void s_umap_insert(struct S_Umap *map, char *key, void *value)
 
 // We can reuse the print logic to go through it
 // or maybe we can somehow hash the keywords/operators again
-void s_umap_free(struct S_Umap *map)
-{
-  (void)map;
-  assert(0 && "unimplemented");
+void s_umap_free(struct S_Umap *map) {
+  for (size_t i = 0; i < map->tbl.cap; ++i) {
+    struct _S_Umap_Node *node = map->tbl.nodes[i];
+    while (node) {
+      struct _S_Umap_Node *next = node->next;
+      node_free(node);
+      node = next;
+    }
+  }
+  free(map->tbl.nodes);
 }
 
 void *s_umap_get(const struct S_Umap *map, char *key)
@@ -137,7 +143,7 @@ void s_umap_print(struct S_Umap *map, void (*vp)(const void *))
 {
   int len = map->tbl.cap;
   printf("The len of the table: %ld\n", map->tbl.len);
-  for(int i = 0; i <= len; i++){
+  for(int i = 0; i < len; i++){
     if(map->tbl.nodes[i]){
       struct _S_Umap_Node *tmp = map->tbl.nodes[i];
       printf("Keys for nodes[%d]: ", i);

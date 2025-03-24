@@ -33,7 +33,6 @@ static struct S_Umap init_sym_keyword_tbl(void) {
   };
 
   for (size_t i = 0; i < (sizeof(syms) / sizeof(*syms)); ++i) {
-    // Create a named variable to hold the Token_Type
     enum Token_Type token = (enum Token_Type)i;
     s_umap_insert(&tbl, syms[i], (void*)&token);
   }
@@ -46,6 +45,7 @@ static struct S_Umap init_sym_keyword_tbl(void) {
 	   syms[i],
 	   *(enum Token_Type *)s_umap_get(&tbl, syms[i]));
   }
+  // DEBUG PRINT
   printf("\n");
 
   assert(sizeof(kws)/sizeof(*kws) == (TOKEN_KEYWORD_LEN - TOKEN_SYMBOL_LEN) - 1);
@@ -56,8 +56,8 @@ static struct S_Umap init_sym_keyword_tbl(void) {
       the appropriate Token_Type to match the keyword. Since the compound literal used
       in the original code would be temporary and could lead to undefined behavior,
       we create a variable `token` to hold the value.
-      This ensures the pointer remains valid
-      for the duration of the `s_umap_insert()` call.
+      This ensures the pointer remains
+      valid for the duration of the `s_umap_insert()` call.
 
       The addition of `+1` and the `i + (int)TOKEN_SYMBOL_LEN` ensures that we're 
       correctly indexing into the Token_Type enum for the corresponding keyword.
@@ -72,6 +72,7 @@ static struct S_Umap init_sym_keyword_tbl(void) {
            *(enum Token_Type *)s_umap_get(&tbl, kws[i])
     );
   }
+  // DEBUG PRINT
   printf("\n");
   return tbl;
 }
@@ -102,6 +103,7 @@ void lexer_dump(const struct Lexer *l)
   Predicate being a function pointer that
   returns a character, escape seq, or something we want to stop at
 */
+// Could potentially be replaced with strspn if source files ever get so big this becomes a performance issue.
 size_t consume_while(char *s, int (*pred)(int))
 {
   size_t counter = 0;
@@ -127,6 +129,8 @@ int not_whitespace(int c)
   return (char)c != ' ';
 }
 
+// might not fully capture cases like <=, >=, or ==.
+// You may want a specialized predicate for operators instead of relying on not_sym.
 int not_sym(int c)
 {
   return !isalnum(c) && c != '_' && c != ' ' && c != '\n' && c != '\t' && c != '\r';
@@ -137,6 +141,7 @@ int is_identifier(int c)
   return isalnum(c) || c == '_';
 }
 
+
 enum Token_Type *determine_symbol(const char *s,
 				  size_t op_len,
 				  struct S_Umap *sym_keyword_tbl,
@@ -146,12 +151,22 @@ enum Token_Type *determine_symbol(const char *s,
 
   // Fix this with dynamically allocated 
   char buf[256] = {0};
-  strncpy(buf, s, op_len);
+
+  if(op_len < sizeof(buf)){
+    strncpy(buf, s, op_len);
+    // just incase
+    buf[op_len] = '\0';
+  }
+  else{
+    //Error out properly when you can 
+    printf("Error at determine_symbol\n");
+    exit(1);
+  }
   
   for (int i = (int)op_len-1; i >= 0; --i) {
     if (s_umap_contains(sym_keyword_tbl, buf)) {
       *actual_len = (size_t)i+1;
-      return s_umap_get(sym_keyword_tbl, buf);
+      return (enum Token_Type *)s_umap_get(sym_keyword_tbl, buf);
     }
     buf[i] = '\0';
   }
@@ -175,7 +190,7 @@ struct Lexer lex_file(char *src, const char *fp)
   size_t i = 0, row = 1, col = 1;
   while(src[i] != '\0'){
     char ch = src[i];
-
+    
     // Skip whitespace and tabs
     if(ch == ' ' || ch == '\t') {
       i += 1, col += 1;
@@ -183,25 +198,37 @@ struct Lexer lex_file(char *src, const char *fp)
 
     // Skip newline and carriage return
     else if(ch == '\n' || ch == '\r') {
-      i += 1, row += 1, col = 1;
+      i += 1;
+      row += 1;
+      col = 1;
     }
 
     // Multi-line comment
     else if(ch == '(' && SAFE_PEEK(src, i+1, '*')){
-
       size_t counter = 0, r_counter = 0, c_counter = 0;
+      while(src[i + counter] && !(src[i+counter] == '*' && src[i+counter+1] == ')')){
 
-      while(src[i+counter] && src[i+counter] != ')'){
-        if(src[i+counter] == '\n' || src[i+counter] == '\r'){
+	if(src[i+counter] == '\n' || src[i+counter] == '\r'){
           r_counter += 1;
           c_counter = 0;
         }
+	
         counter += 1;
         c_counter += 1;
+
+	if(src[i+counter] == '(' && src[i+counter+1] == '*'){
+	  printf("Nested multi-comment at file: \"%s\" on row: %ld col: %ld\n", fp, row, col);
+	  exit(1);
+	}
+      }
+      // What is string is not Buffer Null-Termination?
+      if(!src[i+counter]){
+	printf("unterminated comment at file: \"%s\" on row: %ld col: %ld\n", fp, row, col);
+	exit(1);
       }
 
-      // 1 because we need to skip ')'
-      i += counter + 1;
+      // 2 because we need to skip '*)'
+      i += counter + 2;
       row += r_counter;
       col = 1 + c_counter;
     }
@@ -211,12 +238,13 @@ struct Lexer lex_file(char *src, const char *fp)
       size_t len = consume_while(src + i, not_newline);
       // No need to update to row
       // because skip newline will take care of it
-      i += len, col = 1;
+      i += len;
+      col = 1;
     }
 
     // Identifiers and keywords
     else if(isalpha(ch) || ch == '_'){
-      size_t len = consume_while(src + i, is_identifier);
+      size_t len = consume_while(src+i, is_identifier);
 
       // Use len to create a substring to search
       // for keywords in the hash table
@@ -239,17 +267,28 @@ struct Lexer lex_file(char *src, const char *fp)
     }
 
     // TODO: Make it so that character literals are their own thing.
+    // TODO: Escape sequences in strings?
     else if (ch == '"' || ch == '\'') {
       
       i += 1, col += 1; // " or '
       
       size_t len = consume_while(src+i, not_quote);
+
+      // Ensure we actually found the closing quote
+      // You reference closing_quote in the string literal parsing, but it's not defined.
+      // You should ensure that you compare against ch, which holds the opening quote:
+      if (src[i + len] != ch) {
+        printf("Unterminated string at file: \"%s\" on row: %ld col: %ld\n", fp, row, col);
+        exit(1);
+      }
       
       struct Token *t = token_alloc(TOKEN_STRING_LIT, src+i, len, fp, row, col);
       
       lexer_append(&lexer, t);
-      
-      i += len + 1, col += len + 1; // " or ' + length of string
+
+      // " or ' + length of string
+      i += len + 1;
+      col += len + 1; 
     }
     ////////////////////////////////////////////////////////////////////////////////////
     // Numbers & for loop ranges
@@ -261,27 +300,30 @@ struct Lexer lex_file(char *src, const char *fp)
         len += consume_while(src + i + len, isdigit);  // Consume decimal part
         struct Token *t = token_alloc(TOKEN_FLOAT_LIT, src + i, len, fp, row, col);
         lexer_append(&lexer, t);
-        i += len, col += len;
+        i += len;
+	col += len;
       }
       else{
 	struct Token *t = token_alloc(TOKEN_INT_LIT, src+i, len, fp, row, col);
 	lexer_append(&lexer, t);
-	i += len, col += len;
+	i += len;
+	col += len;
       }
     }
-
 
     else if(ch == '.' && SAFE_PEEK(src, i+1, '.')){
       struct Token *t = token_alloc(TOKEN_FOR_RANGE, src+i, 2, fp, row, col);
       lexer_append(&lexer, t);
-      i += 2; col += 2;
+      i += 2;
+      col += 2;
     }
       
     else if(ch == '.' && src[i+1] && isdigit(src[i+1])){
       size_t len = consume_while(src+i+1, isdigit);
       struct Token *t = token_alloc(TOKEN_FLOAT_LIT, src+i, len, fp, row, col);
       lexer_append(&lexer, t);
-      i += len, col += 2;
+      i += len;
+      col += 2;
     }
     
     ///////////////////////////////////////////////////////////////////////////////////
@@ -292,14 +334,17 @@ struct Lexer lex_file(char *src, const char *fp)
       enum Token_Type *type = determine_symbol(src+i, op_len, &sym_keyword_tbl, &len);
 
       if (!type) {
-        err_wargs("invalid type at: %s\n", src);
+        err_wargs("invalid type at: %s\n", src + i);
       }
 
       struct Token *t = token_alloc(*type, src + i, len, fp, row, col);
       lexer_append(&lexer, t);
 
-      i += len, col += len;
+      i += len;
+      col += len;
     }
   }
+  // Free hash-table
+  s_umap_free(&sym_keyword_tbl);
   return lexer;
 }
