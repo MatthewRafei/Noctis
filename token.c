@@ -6,6 +6,7 @@
 #include "token.h"
 #include "utils.h"
 
+// Refactor enum_to_str using a mapping array for better scalability.
 char *enum_to_str(enum Token_Type type) {
   switch(type) {
   case TOKEN_LPAREN:
@@ -129,9 +130,11 @@ struct Token *token_alloc(enum Token_Type type,
                           const char *fp,
                           size_t row, size_t col)
 {
+  // Memory allocation error checks for strndup and s_malloc.
   struct Token *token = s_malloc(sizeof(struct Token));
 
   token->type = type;
+  // Memory allocation error checks for strndup and s_malloc.
   token->lexeme = strndup(lexeme, end);
   token->fp = fp;
   token->row = row;
@@ -140,6 +143,7 @@ struct Token *token_alloc(enum Token_Type type,
   return token;
 }
 
+// Optionally add a debug flag around the token_dump function to control output in production.
 void token_dump(const struct Token *t)
 {
     printf("[lexeme: %-20s \t type: %-20s \t filepath: %-30s \t row: %-3zu \t col: %-3zu]\n",
