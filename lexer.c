@@ -46,6 +46,7 @@ static struct S_Umap init_sym_keyword_tbl(void) {
 	   syms[i],
 	   *(enum Token_Type *)s_umap_get(&tbl, syms[i]));
   }
+  // DEBUG PRINT
   printf("\n");
 
   assert(sizeof(kws)/sizeof(*kws) == (TOKEN_KEYWORD_LEN - TOKEN_SYMBOL_LEN) - 1);
@@ -72,6 +73,7 @@ static struct S_Umap init_sym_keyword_tbl(void) {
            *(enum Token_Type *)s_umap_get(&tbl, kws[i])
     );
   }
+  // DEBUG PRINT
   printf("\n");
   return tbl;
 }
@@ -102,6 +104,7 @@ void lexer_dump(const struct Lexer *l)
   Predicate being a function pointer that
   returns a character, escape seq, or something we want to stop at
 */
+
 size_t consume_while(char *s, int (*pred)(int))
 {
   size_t counter = 0;
@@ -137,6 +140,7 @@ int is_identifier(int c)
   return isalnum(c) || c == '_';
 }
 
+
 enum Token_Type *determine_symbol(const char *s,
 				  size_t op_len,
 				  struct S_Umap *sym_keyword_tbl,
@@ -146,12 +150,22 @@ enum Token_Type *determine_symbol(const char *s,
 
   // Fix this with dynamically allocated 
   char buf[256] = {0};
-  strncpy(buf, s, op_len);
+
+  if(op_len < sizeof(buf)){
+    strncpy(buf, s, op_len);
+    // just incase
+    buf[op_len] = '\0';
+  }
+  else{
+    //Error out properly when you can 
+    printf("Error at determine_symbol\n");
+    exit(1);
+  }
   
   for (int i = (int)op_len-1; i >= 0; --i) {
     if (s_umap_contains(sym_keyword_tbl, buf)) {
       *actual_len = (size_t)i+1;
-      return s_umap_get(sym_keyword_tbl, buf);
+      return (enum Token_Type *)s_umap_get(sym_keyword_tbl, buf);
     }
     buf[i] = '\0';
   }
@@ -175,7 +189,7 @@ struct Lexer lex_file(char *src, const char *fp)
   size_t i = 0, row = 1, col = 1;
   while(src[i] != '\0'){
     char ch = src[i];
-
+    
     // Skip whitespace and tabs
     if(ch == ' ' || ch == '\t') {
       i += 1, col += 1;
@@ -183,10 +197,14 @@ struct Lexer lex_file(char *src, const char *fp)
 
     // Skip newline and carriage return
     else if(ch == '\n' || ch == '\r') {
-      i += 1, row += 1, col = 1;
+      i += 1;
+      row += 1;
+      col = 1;
     }
 
     // Multi-line comment
+    // TODO: Implement the ability to determine if unterminated multi-line comment is present
+    // TODO: Handle nested mutli-line comments
     else if(ch == '(' && SAFE_PEEK(src, i+1, '*')){
 
       size_t counter = 0, r_counter = 0, c_counter = 0;
@@ -211,12 +229,13 @@ struct Lexer lex_file(char *src, const char *fp)
       size_t len = consume_while(src + i, not_newline);
       // No need to update to row
       // because skip newline will take care of it
-      i += len, col = 1;
+      i += len;
+      col = 1;
     }
 
     // Identifiers and keywords
     else if(isalpha(ch) || ch == '_'){
-      size_t len = consume_while(src + i, is_identifier);
+      size_t len = consume_while(src+i, is_identifier);
 
       // Use len to create a substring to search
       // for keywords in the hash table
@@ -248,8 +267,10 @@ struct Lexer lex_file(char *src, const char *fp)
       struct Token *t = token_alloc(TOKEN_STRING_LIT, src+i, len, fp, row, col);
       
       lexer_append(&lexer, t);
-      
-      i += len + 1, col += len + 1; // " or ' + length of string
+
+      // " or ' + length of string
+      i += len + 1;
+      col += len + 1; 
     }
     ////////////////////////////////////////////////////////////////////////////////////
     // Numbers & for loop ranges
@@ -261,12 +282,14 @@ struct Lexer lex_file(char *src, const char *fp)
         len += consume_while(src + i + len, isdigit);  // Consume decimal part
         struct Token *t = token_alloc(TOKEN_FLOAT_LIT, src + i, len, fp, row, col);
         lexer_append(&lexer, t);
-        i += len, col += len;
+        i += len;
+	col += len;
       }
       else{
 	struct Token *t = token_alloc(TOKEN_INT_LIT, src+i, len, fp, row, col);
 	lexer_append(&lexer, t);
-	i += len, col += len;
+	i += len;
+	col += len;
       }
     }
 
@@ -274,14 +297,16 @@ struct Lexer lex_file(char *src, const char *fp)
     else if(ch == '.' && SAFE_PEEK(src, i+1, '.')){
       struct Token *t = token_alloc(TOKEN_FOR_RANGE, src+i, 2, fp, row, col);
       lexer_append(&lexer, t);
-      i += 2; col += 2;
+      i += 2;
+      col += 2;
     }
       
     else if(ch == '.' && src[i+1] && isdigit(src[i+1])){
       size_t len = consume_while(src+i+1, isdigit);
       struct Token *t = token_alloc(TOKEN_FLOAT_LIT, src+i, len, fp, row, col);
       lexer_append(&lexer, t);
-      i += len, col += 2;
+      i += len;
+      col += 2;
     }
     
     ///////////////////////////////////////////////////////////////////////////////////
@@ -298,7 +323,8 @@ struct Lexer lex_file(char *src, const char *fp)
       struct Token *t = token_alloc(*type, src + i, len, fp, row, col);
       lexer_append(&lexer, t);
 
-      i += len, col += len;
+      i += len;
+      col += len;
     }
   }
   return lexer;

@@ -56,9 +56,11 @@ func main() -> unit {
     }
 
 
-    let float_number: float = 333333333333.33333333333333;
+    let float_number: float = 33333333.333333333;
     let float_number_2: float = .33333333333333333
     let float_number_3: float = 12223232.
+    let float_test: float = 1..2.3
+    let float_test_2: float = 1.2..3
 
     -- Using the public add function
     let sum: int = add(5, 7);

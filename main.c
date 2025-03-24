@@ -19,17 +19,20 @@ char *file_to_str(const char *fp)
     exit(1);
   }
 
-  fseek(file, 0, SEEK_END);
-  long length = ftell(file);
+  if (fseek(file, 0, SEEK_END) != 0){
+    perror("Failed to seek file");
+    fclose(file);
+    return NULL;
+  }
+
+  size_t length = ftell(file);
   // Some file-systems might return -1
-  if(length == -1){
+  if(length == (size_t)-1){
     printf("Failed to determine file length\n");
     fclose(file);
     return NULL;
   }
 
-  // Go through file one to determine length
-  // Then go back to beginning
   rewind(file);
 
   // No need to cast char* as malloc's return type
@@ -41,17 +44,25 @@ char *file_to_str(const char *fp)
     return NULL;
   }
 
-  fread(buffer, 1, length, file);
-  fclose(file);
+  //Free buffer if fread fails
+  size_t read_size = fread(buffer, 1, length, file);
+  if(read_size != (size_t)length){
+    perror("Failed to read file");
+    free(buffer);
+    fclose(file);
+    return NULL;
+  }
 
   buffer[length] = '\0';
+  fclose(file);
   return buffer;
 }
 
-void help(void)
+int help(void)
 {
   printf("Usage: noctis <filepath>\n");
-  exit(1);
+  //exit(1);
+  return 1;
 }
 
 int main(int argc, char *argv[])
@@ -62,6 +73,12 @@ int main(int argc, char *argv[])
 
   const char *fp = argv[1];
   char *src = file_to_str(fp);
+
+  // check source before calling lex_file
+  if(!src){
+    // Maybe replace with better error handling
+    return 1; // Exit gracefully, g
+  }
 
   struct Lexer lexer = lex_file(src, fp);
   lexer_dump(&lexer);
