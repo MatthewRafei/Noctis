@@ -102,10 +102,10 @@ func main() -> unit {
         return expr;
     }
     
-    while expr {
+    while i != 2 {
         -- do something
     }
-    
+
     for i in 1..size {
         -- do something
     }
