@@ -208,23 +208,23 @@ struct Lexer lex_file(char *src, const char *fp)
       size_t counter = 0, r_counter = 0, c_counter = 0;
       while(src[i + counter] && !(src[i+counter] == '*' && src[i+counter+1] == ')')){
 
-	if(src[i+counter] == '\n' || src[i+counter] == '\r'){
-          r_counter += 1;
-          c_counter = 0;
+        if(src[i+counter] == '\n' || src[i+counter] == '\r'){
+            r_counter += 1;
+            c_counter = 0;
         }
-	
+    
         counter += 1;
         c_counter += 1;
 
-	if(src[i+counter] == '(' && src[i+counter+1] == '*'){
-	  printf("Nested multi-comment at file: \"%s\" on row: %ld col: %ld\n", fp, row, col);
-	  exit(1);
-	}
+        if(src[i+counter] == '(' && src[i+counter+1] == '*'){
+          printf("Nested multi-comment at file: \"%s\" on row: %ld col: %ld\n", fp, row, col);
+          exit(1);
+        }
       }
       // What is string is not Buffer Null-Termination?
       if(!src[i+counter]){
-	printf("unterminated comment at file: \"%s\" on row: %ld col: %ld\n", fp, row, col);
-	exit(1);
+        printf("unterminated comment at file: \"%s\" on row: %ld col: %ld\n", fp, row, col);
+        exit(1);
       }
 
       // 2 because we need to skip '*)'
@@ -248,7 +248,8 @@ struct Lexer lex_file(char *src, const char *fp)
 
       // Use len to create a substring to search
       // for keywords in the hash table
-      char substring[len + 1];
+      //char substring[len + 1];
+      char *substring = s_malloc(len+1);
       memcpy(substring, src + i, len);
       substring[len] = '\0';
 
@@ -264,14 +265,16 @@ struct Lexer lex_file(char *src, const char *fp)
         lexer_append(&lexer, t);
         i += len, col += len;
       }
+
+      free(substring);
     }
 
     // TODO: Make it so that character literals are their own thing.
     // TODO: Escape sequences in strings?
     else if (ch == '"' || ch == '\'') {
-      
+
       i += 1, col += 1; // " or '
-      
+
       size_t len = consume_while(src+i, not_quote);
 
       // Ensure we actually found the closing quote
@@ -281,9 +284,9 @@ struct Lexer lex_file(char *src, const char *fp)
         printf("Unterminated string at file: \"%s\" on row: %ld col: %ld\n", fp, row, col);
         exit(1);
       }
-      
+
       struct Token *t = token_alloc(TOKEN_STRING_LIT, src+i, len, fp, row, col);
-      
+
       lexer_append(&lexer, t);
 
       // " or ' + length of string
@@ -301,13 +304,13 @@ struct Lexer lex_file(char *src, const char *fp)
         struct Token *t = token_alloc(TOKEN_FLOAT_LIT, src + i, len, fp, row, col);
         lexer_append(&lexer, t);
         i += len;
-	col += len;
+        col += len;
       }
       else{
-	struct Token *t = token_alloc(TOKEN_INT_LIT, src+i, len, fp, row, col);
-	lexer_append(&lexer, t);
-	i += len;
-	col += len;
+        struct Token *t = token_alloc(TOKEN_INT_LIT, src+i, len, fp, row, col);
+        lexer_append(&lexer, t);
+        i += len;
+        col += len;
       }
     }
 
@@ -317,7 +320,7 @@ struct Lexer lex_file(char *src, const char *fp)
       i += 2;
       col += 2;
     }
-      
+
     else if(ch == '.' && src[i+1] && isdigit(src[i+1])){
       size_t len = consume_while(src+i+1, isdigit);
       struct Token *t = token_alloc(TOKEN_FLOAT_LIT, src+i, len, fp, row, col);
@@ -325,7 +328,7 @@ struct Lexer lex_file(char *src, const char *fp)
       i += len;
       col += 2;
     }
-    
+
     ///////////////////////////////////////////////////////////////////////////////////
     // Operators
     else {

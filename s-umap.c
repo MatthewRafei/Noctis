@@ -17,29 +17,28 @@ struct S_Umap s_umap_create(s_umap_hash hash, size_t nodev_stride)
 {
   assert(hash);
 
-  struct S_Umap map = (struct S_Umap) {
-    .tbl = {
-      .nodes = (struct _S_Umap_Node **)calloc(INITAL_CAPACITY,
-					      sizeof(struct _S_Umap_Node *)),
-      .len = 0,
-      .cap = INITAL_CAPACITY,
-    },
-    .hash = hash,
-    .nodev_stride = nodev_stride,
+  struct S_Umap map = (struct S_Umap){
+      .tbl = {
+          .nodes = (struct _S_Umap_Node **)calloc(INITAL_CAPACITY,
+                                                  sizeof(struct _S_Umap_Node *)),
+          .len = 0,
+          .cap = INITAL_CAPACITY,
+      },
+      .hash = hash,
+      .nodev_stride = nodev_stride,
   };
 
   return map;
 }
 
-struct _S_Umap_Node* _s_umap_node_create(char* key,
-					 void *value,
-					 size_t nodev_stride)
+struct _S_Umap_Node *_s_umap_node_create(char *key,
+                                         void *value,
+                                         size_t nodev_stride)
 {
-  struct _S_Umap_Node* node = (struct _S_Umap_Node *)s_malloc
-    (sizeof(struct _S_Umap_Node));
+  struct _S_Umap_Node *node = (struct _S_Umap_Node *)s_malloc(sizeof(struct _S_Umap_Node));
   node->next = NULL;
 
-  node->key = strdup(key);  
+  node->key = strdup(key);
 
   node->value = s_malloc(nodev_stride);
   (void)memcpy((uint32_t *)node->value, (uint32_t *)value, nodev_stride);
@@ -56,8 +55,10 @@ static struct _S_Umap_Node *list_has_key(const struct S_Umap *m,
 {
   *prev = NULL;
   struct _S_Umap_Node *it = m->tbl.nodes[idx];
-  while (it) {
-    if (!strcmp(it->key, k)) {
+  while (it)
+  {
+    if (!strcmp(it->key, k))
+    {
       return it;
     }
     *prev = it;
@@ -83,15 +84,21 @@ void s_umap_insert(struct S_Umap *map, char *key, void *value)
   struct _S_Umap_Node *prev = NULL;
   struct _S_Umap_Node *it = list_has_key(map, idx, key, &prev);
 
-  if (!it) {
+  if (!it)
+  {
     struct _S_Umap_Node *tmp = map->tbl.nodes[idx];
     map->tbl.nodes[idx] = node;
     map->tbl.nodes[idx]->next = tmp;
-  } else {
-    if(!prev){
+  }
+  else
+  {
+    if (!prev)
+    {
       map->tbl.nodes[idx] = node;
       node->next = it;
-    } else {
+    }
+    else
+    {
       prev->next = node;
       node->next = it->next;
     }
@@ -102,10 +109,13 @@ void s_umap_insert(struct S_Umap *map, char *key, void *value)
 
 // We can reuse the print logic to go through it
 // or maybe we can somehow hash the keywords/operators again
-void s_umap_free(struct S_Umap *map) {
-  for (size_t i = 0; i < map->tbl.cap; ++i) {
+void s_umap_free(struct S_Umap *map)
+{
+  for (size_t i = 0; i < map->tbl.cap; ++i)
+  {
     struct _S_Umap_Node *node = map->tbl.nodes[i];
-    while (node) {
+    while (node)
+    {
       struct _S_Umap_Node *next = node->next;
       node_free(node);
       node = next;
@@ -120,8 +130,10 @@ void *s_umap_get(const struct S_Umap *map, char *key)
 
   struct _S_Umap_Node *it = map->tbl.nodes[idx];
 
-  while (it) {
-    if (!strcmp(it->key, key)) {
+  while (it)
+  {
+    if (!strcmp(it->key, key))
+    {
       return it->value;
     }
     it = it->next;
@@ -143,20 +155,27 @@ void s_umap_print(struct S_Umap *map, void (*vp)(const void *))
 {
   int len = map->tbl.cap;
   printf("The len of the table: %ld\n", map->tbl.len);
-  for(int i = 0; i < len; i++){
-    if(map->tbl.nodes[i]){
+  for (int i = 0; i < len; i++)
+  {
+    if (map->tbl.nodes[i])
+    {
       struct _S_Umap_Node *tmp = map->tbl.nodes[i];
       printf("Keys for nodes[%d]: ", i);
-      while(tmp){
+      while (tmp)
+      {
         printf("(\"%s\"", tmp->key);
-        if(vp) {
+        if (vp)
+        {
           printf(", ");
           vp(tmp->value);
         }
         tmp = tmp->next;
-        if (tmp) {
+        if (tmp)
+        {
           printf(") -> ");
-        } else {
+        }
+        else
+        {
           printf(")\n");
         }
       }

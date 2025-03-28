@@ -77,7 +77,7 @@ int main(int argc, char *argv[])
   // check source before calling lex_file
   if(!src){
     // Maybe replace with better error handling
-    return 1; // Exit gracefully, g
+    return 1; // Exit gracefully, you OG
   }
 
   struct Lexer lexer = lex_file(src, fp);

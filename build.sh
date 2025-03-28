@@ -2,4 +2,4 @@
 
 set -xe
 
-cc -Iinclude/ -Wextra -Wall -Werror -pedantic -g -O0 -o noctis *.c
+cc -Iinclude/ -Wextra -Wall -std=gnu17 -Werror -pedantic -g -O0 -o noctis *.c
