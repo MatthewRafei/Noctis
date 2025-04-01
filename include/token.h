@@ -37,6 +37,7 @@ enum Token_Type {
   TOKEN_GTGT,      // >>
   TOKEN_LTLT,      // <<
   TOKEN_FOR_RANGE, // {num}..{num}
+  TOKEN_ARROW,     // ->
   TOKEN_SYMBOL_LEN,// DO NOT USE
 
   // Keywords

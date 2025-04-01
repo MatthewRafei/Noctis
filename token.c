@@ -116,7 +116,9 @@ char *enum_to_str(enum Token_Type type) {
   case TOKEN_IN:
     return "TOKEN_IN";
   case TOKEN_FOR_RANGE:
-    return "TOKEN_FOR_RANGE";    
+    return "TOKEN_FOR_RANGE";
+  case TOKEN_ARROW:
+    return "TOKEN_ARROW";
   default:
     // GCC will complain 'TOKEN_SYMBOL_LEN'
     // and 'TOKEN_KEYWORD_LEN' are not accounted

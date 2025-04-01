@@ -60,6 +60,7 @@ char *file_to_str(const char *fp)
 
 int help(void)
 {
+  // Impliment multi-file support
   printf("Usage: noctis <filepath>\n");
   //exit(1);
   return 1;
@@ -80,8 +81,16 @@ int main(int argc, char *argv[])
     return 1; // Exit gracefully, you OG
   }
 
+  // Lexer
   struct Lexer lexer = lex_file(src, fp);
   lexer_dump(&lexer);
+  printf("\nWhat is lexer size: %ld\n", lexer.size);
+
+  // Parser
+  /* struct Parser parser = parse_lexer(&lexer); */
+  /* parser_dump(&parser); */
+
+  
 
   free(src);
   return 0;

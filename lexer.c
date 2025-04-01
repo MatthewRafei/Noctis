@@ -27,9 +27,10 @@ static struct S_Umap init_sym_keyword_tbl(void) {
     ">",  "<",           // TOKEN_GT, TOKEN_LT
     ";",  "&",           // TOKEN_SCOLON, TOKEN_AND
     ">=", "<=",          // TOKEN_GE, TOKEN_LE
-    "~=", "==",           // TOKEN_NE, TOKEN_EQ
+    "~=", "==",          // TOKEN_NE, TOKEN_EQ
     "=",                 // TOKEN_ASSIGN
     ">>", "<<",          // TOKEN_GTGT, TOKEN_LTLT
+    "->",                // TOKEN_ARROW
   };
 
   for (size_t i = 0; i < (sizeof(syms) / sizeof(*syms)); ++i) {
@@ -39,13 +40,13 @@ static struct S_Umap init_sym_keyword_tbl(void) {
 
   // Keywords
   char *kws[] = KEYWORD_ASCPL;
-
+  
+  // DEBUG PRINT
   for (size_t i = 0; i < (sizeof(syms)/sizeof(*syms)); ++i) {
     printf("Symbol: %s -> Token: %d\n",
 	   syms[i],
 	   *(enum Token_Type *)s_umap_get(&tbl, syms[i]));
   }
-  // DEBUG PRINT
   printf("\n");
 
   assert(sizeof(kws)/sizeof(*kws) == (TOKEN_KEYWORD_LEN - TOKEN_SYMBOL_LEN) - 1);
@@ -53,11 +54,7 @@ static struct S_Umap init_sym_keyword_tbl(void) {
   for (size_t i = 0; i < sizeof(kws)/sizeof(*kws); ++i) {
     /*
       Because s_umap_insert() takes void* as the value, we need to create a variable of 
-      the appropriate Token_Type to match the keyword. Since the compound literal used
-      in the original code would be temporary and could lead to undefined behavior,
-      we create a variable `token` to hold the value.
-      This ensures the pointer remains
-      valid for the duration of the `s_umap_insert()` call.
+      the appropriate Token_Type to match the keyword.
 
       The addition of `+1` and the `i + (int)TOKEN_SYMBOL_LEN` ensures that we're 
       correctly indexing into the Token_Type enum for the corresponding keyword.
@@ -66,14 +63,15 @@ static struct S_Umap init_sym_keyword_tbl(void) {
     s_umap_insert(&tbl, kws[i], (void*)&token);
   }
 
+  // DEBUG PRINT
   for (size_t i = 0; i < sizeof(kws)/sizeof(*kws); ++i) {
     printf("Keyword: %s -> Token: %d\n",
            kws[i],
            *(enum Token_Type *)s_umap_get(&tbl, kws[i])
     );
   }
-  // DEBUG PRINT
   printf("\n");
+  
   return tbl;
 }
 
@@ -86,6 +84,8 @@ static void lexer_append(struct Lexer *l, struct Token *t)
     l->tl->next = t;
     l->tl = l->tl->next;
   }
+  // We should be checking to see how big the lexer is lol
+  l->size += 1;
 }
 
 void lexer_dump(const struct Lexer *l)
@@ -314,6 +314,16 @@ struct Lexer lex_file(char *src, const char *fp)
       }
     }
 
+    else if(ch == '-' && SAFE_PEEK(src, i+1, '>')){
+      struct Token *t = token_alloc(TOKEN_ARROW, src+i, 2, fp, row, col);
+      lexer_append(&lexer, t);
+      i += 2;
+      col += 2;
+    }
+
+    // How the h*** is the arrow operator hitting this condition?
+    // Added the conditional above this one so it would hit first....
+    // But Im keeping my eye on you lol
     else if(ch == '.' && SAFE_PEEK(src, i+1, '.')){
       struct Token *t = token_alloc(TOKEN_FOR_RANGE, src+i, 2, fp, row, col);
       lexer_append(&lexer, t);
