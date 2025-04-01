@@ -5,6 +5,7 @@
 
 struct Lexer {
   struct Token *hd, *tl;
+  size_t size;
 };
 
 struct Lexer lex_file(char *src, const char *fp);
