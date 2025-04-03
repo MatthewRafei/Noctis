@@ -4,4 +4,14 @@ struct Parser{
   size_t current_token;
 };
 
+enum AST_Token_Type {
+  TOKEN_INT
+};
 
+struct AST_Token{
+  
+};
+
+struct AST{
+
+};

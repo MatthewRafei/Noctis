@@ -2,6 +2,7 @@
 #include <stdlib.h>
 
 #include "lexer.h"
+#include "parser.h"
 
 // Parser use type pruning
 
@@ -87,9 +88,10 @@ int main(int argc, char *argv[])
   printf("\nWhat is lexer size: %ld\n", lexer.size);
 
   // Parser
-  /* struct Parser parser = parse_lexer(&lexer); */
-  /* parser_dump(&parser); */
+  struct Parser parser = parse_lexer(&lexer); 
+  //parser_dump(&parser);
 
+  (void)parser;
   
 
   free(src);

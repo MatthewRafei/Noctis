@@ -1,4 +1,3 @@
 //#include "grammar.h"
 
-int i;
-
+int i = 0;
