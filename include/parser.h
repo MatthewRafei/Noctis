@@ -5,13 +5,13 @@ struct Parser{
 };
 
 enum AST_Token_Type {
-  TOKEN_INT
+  AST_TOKEN_INT
 };
 
 struct AST_Token{
-  
+  int i;
 };
 
 struct AST{
-
+  int i;
 };

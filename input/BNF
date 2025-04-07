@@ -1,0 +1,68 @@
+<program> ::= { <statement> }
+
+<statement> ::= <import>
+             | <function_def>
+             | <expression> ";"
+             | <variable_decl>
+             | <comment>
+
+<import> ::= "import" <path> ";"
+          | "import" <path> "::" "{" <identifier_list> "}" ";"
+
+<path> ::= <identifier> { "." <identifier> }
+
+<function_def> ::= ["export"] "func" <identifier> "(" [<parameters>] ")" "->" <type> "{" { <statement> } "}"
+
+<parameters> ::= <parameter> { "," <parameter> }
+<parameter> ::= <identifier> ":" <type> ["=" <expression>]
+
+<type> ::= "int" | "float" | "string" | "unit"
+        | "&" <type>
+        | "&mut" <type>
+
+<variable_decl> ::= "let" ["mut"] <identifier> ":" <type> "=" <expression> ";"
+
+<expression> ::= <literal>
+              | <identifier>
+              | <function_call>
+              | <binary_expr>
+              | <unary_expr>
+              | <range_expr>
+              | <borrow_expr>
+
+<function_call> ::= <identifier> "(" [<arguments>] ")"
+<arguments> ::= <expression> { "," <expression> }
+
+<binary_expr> ::= <expression> <binary_op> <expression>
+<binary_op> ::= "+" | "-" | "*" | "/" | "==" | "!=" | ".."
+
+<unary_expr> ::= "-" <expression> | "+" <expression>
+
+<range_expr> ::= <expression> ".." <expression>
+
+<borrow_expr> ::= "&" <expression> | "&mut" <expression>
+
+<control_flow> ::= <if_stmt> | <for_loop>
+
+<if_stmt> ::= "if" <expression> "{" { <statement> } "}"
+
+<for_loop> ::= "for" <identifier> "in" <range_expr> "{" { <statement> } "}"
+
+<literal> ::= <int_lit> | <float_lit> | <string_lit>
+
+<int_lit> ::= [0-9]+
+<float_lit> ::= [0-9]+ "." [0-9]* | "." [0-9]+
+<string_lit> ::= "\"" { <char> } "\""
+
+<identifier> ::= [a-zA-Z_][a-zA-Z0-9_]*
+<identifier_list> ::= <identifier> { "," <identifier> }
+
+<comment> ::= "--" <single_line_comment>
+           | "(*" <multi_line_comment> "*)"
+
+<single_line_comment> ::= { <any_char_except_newline> }
+<multi_line_comment> ::= { <any_char_except_*)> }
+
+<char> ::= any printable character except '"'
+<any_char_except_newline> ::= any character except "\n"
+<any_char_except_*)> ::= any character except "*)"

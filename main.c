@@ -88,10 +88,10 @@ int main(int argc, char *argv[])
   printf("\nWhat is lexer size: %ld\n", lexer.size);
 
   // Parser
-  struct Parser parser = parse_lexer(&lexer); 
+  //struct Parser parser = parse_lexer(&lexer); 
   //parser_dump(&parser);
 
-  (void)parser;
+  //(void)parser;
   
 
   free(src);
