@@ -21,7 +21,6 @@ enum Stmt_Type {
   STMT_TYPE_WHILE,
   STMT_TYPE_FOR,
   STMT_TYPE_BLOCK,
-  STMT_TYPE_FUNC,
 };
 
 ///////////////////
@@ -85,20 +84,21 @@ struct Expr {
 // Statements
 ///////////////////
 
+struct Stmt {
+  enum Stmt_Type type;
+};
+
 struct Stmt_Block {
   struct Stmt base;
-  struct {
-    struct Stmt *data;
-    size_t len;
-  } stmts;
+  struct Stmt **stmts;
+  size_t len, cap;
 };
 
 struct Stmt_For {
   struct Stmt base;
-  struct Token *id;
+  struct Token *enumerator_id;
   struct Expr_Range range;
   struct Stmt_Block *block;
-
 };
 
 struct Stmt_While {
@@ -115,16 +115,25 @@ struct Stmt_Let {
   struct Expr *expr;
 };
 
+// <function_def> ::= ["export"] "func" <identifier> "(" [<parameters>] ")" "->" <type> "{" { <statement> } "}"
 struct Stmt_Func {
   struct Stmt base;
+  int is_export;
   struct Token *id;
   struct Token **params;
-  struct Expr **expr;
-  
+  struct Noctis_Type **param_types;
+  struct Noctis_Type *return_type;
+  struct Stmt_Block *block;
 };
 
-struct Stmt {
-  enum Stmt_Type type;
+// Root node of AST
+struct Program {
+  struct Stmt **stmts;
+  size_t len, cap;
 };
+
+void dump_program(struct Program *p);
+struct Stmt *stmt_alloc(enum Stmt_Type type);
+
 
 #endif // GRAMMAR_H

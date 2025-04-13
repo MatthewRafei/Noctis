@@ -1,17 +1,12 @@
-struct Parser{
-  struct Lexer lexer;
-  size_t lexer_length;
-  size_t current_token;
-};
+#ifndef PARSER_H
+#define PARSER_H
 
-enum AST_Token_Type {
-  AST_TOKEN_INT
-};
+// struct Parser {
+//   struct Lexer lexer;
+//   size_t lexer_length;
+//   size_t current_token;
+// };
 
-struct AST_Token{
-  int i;
-};
+struct Program *parse_program(struct Lexer *l);
 
-struct AST{
-  int i;
-};
+#endif

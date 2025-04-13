@@ -1,7 +1,7 @@
 #ifndef TYPES_H
 #define TYPES_H
 
-// You can possibly use bit shifting to improve performance
+// https://github.com/malloc-nbytes/Score/blob/toD/src/types.d
 
 enum Noctis_Base_Type {
     NOCTIS_TYPE_INT,

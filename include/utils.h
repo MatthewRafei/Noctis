@@ -24,5 +24,6 @@
 #define halt (exit(0))
 
 void *s_malloc(size_t bytes);
+int streq(const char *s0, const char *s1);
 
 #endif // UTILS_H
