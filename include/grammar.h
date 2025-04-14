@@ -3,7 +3,6 @@
 
 #include "token.h"
 #include "types.h"
-#include "dyn_array.h"
 
 enum Expr_Type {
   EXPR_TYPE_BIN,
@@ -49,19 +48,20 @@ struct Stmt;
 ///////////////////
 
 struct Expr_Mut {
-  int i;
+  int bool;
 };
 
 struct Expr_Identifier {
-  int i;
+  char *name;
 };
 
 struct Expr_Int_Lit {
-  int i;
+  int value;
 };
 
 struct Expr_Str_Lit {
-  int i;
+  char *string;
+  int len;
 };
 
 struct Expr_Unary {
@@ -115,7 +115,6 @@ struct Stmt_Let {
   struct Expr *expr;
 };
 
-// <function_def> ::= ["export"] "func" <identifier> "(" [<parameters>] ")" "->" <type> "{" { <statement> } "}"
 struct Stmt_Func {
   struct Stmt base;
   int is_export;

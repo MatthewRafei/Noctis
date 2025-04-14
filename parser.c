@@ -6,12 +6,12 @@
 #include "token.h"
 #include "grammar.h"
 
-
-struct Token *peek(struct Lexer *l, size_t current)
+// Returns token at param current index
+struct Token *peek(struct Lexer *l, size_t index)
 {
   struct Token *t = l->hd;
-  if(current <= l->size){
-    for(size_t i = 0; i < current; i++){
+  if(index <= l->size){
+    for(size_t i = 0; i < index; i++){
       t = t->next;
     }
   }
@@ -31,6 +31,7 @@ struct Token *advance(struct Lexer *l, size_t *current)
   return t;
 }
 
+// Discard token in cases of unneeded keywords
 void discard(struct Lexer *l) {
   assert(l->hd);
   l->hd = l->hd->next;
@@ -52,24 +53,6 @@ enum Token_Type is_next(struct Lexer *l, size_t current)
   }
   return tt;
 }
-
-// int expect(struct Lexer *l, size_t current, enum Token_Type exp_typ)
-// {
-//   struct Token *t = l->hd;
-//   if(current <= l->size){
-//     for(size_t i = 0; i < current; i++){
-//       t = t->next;
-//     }
-//     // Go one ahead
-//     t = t->next;
-//   }
-
-//   if(t->type == exp_typ){
-//     return 1;
-//   }
-
-//   return 0;
-// }
 
 struct Token *expect(struct Lexer *l, enum Token_Type exp) {
   if (!l->hd) {
@@ -132,10 +115,13 @@ struct Stmt_Let *parse_let(struct Lexer *l)
   struct Expr *e = NULL;
 
   discard(l); // let
+
+  // TODO: Impliment mut
   mut = peek(l, 0)->type == TOKEN_MUT;
   if (mut) {
     discard(l); // mut
   }
+  
   id = expect(l, TOKEN_IDENTIFIER);
   (void)expect(l, TOKEN_COLON);
   //type = parse_type(l); // TODO: handle type parsing
@@ -166,8 +152,9 @@ struct Stmt *parse_stmt(struct Lexer *l)
 struct Program *parse_program(struct Lexer *l)
 {
   struct Program *p = malloc(sizeof(struct Program));
-  // QAD fix later
+  // Quick and dirty fix later
   p->stmts = malloc(sizeof(struct Stmt) * 8);
+  
   p->len = 0, p->cap = 8;
   
   while (peek(l, 0) != NULL) {
@@ -179,4 +166,20 @@ struct Program *parse_program(struct Lexer *l)
 
   return p;
 }
+
+//======================= Expression Parsing
+
+/* void *parse_term(struct Lexer *l) */
+/* { */
+/*   struct Term  */
+
+
+/* void *parse_expression(struct Lexer *l) */
+/* { */
+/*   struct Expr e = parse_term(&l); */
+
+
+/* } */
+
+
 

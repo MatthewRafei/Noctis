@@ -4,7 +4,11 @@
              | <function_def>
              | <expression> ";"
              | <variable_decl>
+             | <const_declaration>
+             | <control_flow>
              | <comment>
+
+<const_declaration> ::= "const" <identifier> ":" <type> "=" <expression> ";"
 
 <import> ::= "import" <path> ";"
           | "import" <path> "::" "{" <identifier_list> "}" ";"
