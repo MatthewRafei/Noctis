@@ -5,6 +5,7 @@
 
 enum Noctis_Type_Kind {
   NOCTIS_TYPE_KIND_INT,
+  NOCTIS_TYPE_KIND_FLOAT,
   NOCTIS_TYPE_KIND_STR,
   NOCTIS_TYPE_KIND_CHAR,
   NOCTIS_TYPE_KIND_PTR,
@@ -17,6 +18,11 @@ struct Noctis_Type {
 };
 
 struct Noctis_Type_Int {
+  struct Noctis_Type base;
+  int value;
+};
+
+struct Noctis_Type_Float {
   struct Noctis_Type base;
 };
 

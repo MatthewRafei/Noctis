@@ -85,8 +85,10 @@ int main(int argc, char *argv[])
 
   // Lexer
   struct Lexer lexer = lex_file(src, fp);
+  printf("LEXER:\n");
   lexer_dump(&lexer);
   printf("\nWhat is lexer size: %ld\n", lexer.size);
+  printf("\n");
 
   // Parser
   struct Program *program = parse_program(&lexer);

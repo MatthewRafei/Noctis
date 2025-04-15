@@ -3,6 +3,7 @@
 #include <assert.h>
 
 #include "grammar.h"
+#include "types.h"
 
 
 //======================= PRINTERS
@@ -20,8 +21,9 @@ static void dump_stmt_let(struct Stmt_Let *s, int padding) {
         printf("(MUT) ");
     }
     printf("%s: ", s->id->lexeme);
-    printf("TYPE: (unimplemented) = ");
-    printf("(expr unimplemented)");
+    //printf("TYPE: %s ", noctis_enum_to_str(s->type));
+    printf("TYPE: %s ", "WHY YOU NO WORK");
+    printf("(expr) ");
     printf(";\n");
 }
 
@@ -93,3 +95,19 @@ struct Stmt *stmt_alloc(enum Stmt_Type type)
     assert(0 && "unreachable");
     return NULL;
 }
+
+
+/* char *noctis_enum_to_str(enum Noctis_Type *type) */
+/* { */
+/*   switch(type) { */
+/*   case Noctis_Type_Int: */
+/*     return "Noctis_Type_Int"; */
+/*   default: */
+/*     // GCC will complain 'TOKEN_SYMBOL_LEN' */
+/*     // and 'TOKEN_KEYWORD_LEN' are not accounted */
+/*     return "UNKNOWN_NOCTIS_TYPE or you forgot to add it to noctis_enum_to_str"; */
+/*   } */
+/*   return NULL; //unreachable */
+/* } */
+
+    

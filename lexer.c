@@ -43,12 +43,12 @@ static struct S_Umap init_sym_keyword_tbl(void) {
   
   /// DEBUG PRINT
   // maybe we move debug printing to utils.c
-  for (size_t i = 0; i < (sizeof(syms)/sizeof(*syms)); ++i) {
-    printf("Symbol: %s -> Token: %d\n",
-	   syms[i],
-	   *(enum Token_Type *)s_umap_get(&tbl, syms[i]));
-  }
-  printf("\n");
+  /* for (size_t i = 0; i < (sizeof(syms)/sizeof(*syms)); ++i) { */
+  /*   printf("Symbol: %s -> Token: %d\n", */
+  /* 	   syms[i], */
+  /* 	   *(enum Token_Type *)s_umap_get(&tbl, syms[i])); */
+  /* } */
+  /* printf("\n"); */
   /// DEBUG PRINT END
   
   assert(sizeof(kws)/sizeof(*kws) == (TOKEN_KEYWORD_LEN - TOKEN_SYMBOL_LEN) - 1);
@@ -66,12 +66,12 @@ static struct S_Umap init_sym_keyword_tbl(void) {
   }
 
   /// DEBUG PRINT
-  for (size_t i = 0; i < sizeof(kws)/sizeof(*kws); ++i) {
-    printf("Keyword: %s -> Token: %d\n",
-           kws[i],
-           *(enum Token_Type *)s_umap_get(&tbl, kws[i])
-    );
-  }
+  /* for (size_t i = 0; i < sizeof(kws)/sizeof(*kws); ++i) { */
+  /*   printf("Keyword: %s -> Token: %d\n", */
+  /*          kws[i], */
+  /*          *(enum Token_Type *)s_umap_get(&tbl, kws[i]) */
+  /*   ); */
+  /* } */
   printf("\n");
   /// DEBUG PRINT END
   
