@@ -134,5 +134,4 @@ struct Program {
 void dump_program(struct Program *p);
 struct Stmt *stmt_alloc(enum Stmt_Type type);
 
-
 #endif // GRAMMAR_H

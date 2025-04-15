@@ -5,6 +5,9 @@
 #include "lexer.h"
 #include "token.h"
 #include "grammar.h"
+#include "utils.h"
+
+#define safe_peek(l, n) peek(l, n) && peek(l, n) // they both have to be true?
 
 // Returns token at param current index
 struct Token *peek(struct Lexer *l, size_t index)
@@ -18,120 +21,118 @@ struct Token *peek(struct Lexer *l, size_t index)
   return t;
 }
 
-// consume a token
-struct Token *advance(struct Lexer *l, size_t *current)
-{
-  struct Token *t = l->hd;
-  if(*current <= l->size){
-    for(size_t i = 0; i < *current; i++){
-      t = t->next;
-    }
-  }
-  current += 1;
-  return t;
-}
-
 // Discard token in cases of unneeded keywords
 void discard(struct Lexer *l) {
   assert(l->hd);
   l->hd = l->hd->next;
 }
 
-enum Token_Type is_next(struct Lexer *l, size_t current)
-{
-  enum Token_Type tt;
-  struct Token *t = l->hd;
-  if(current+1 <= l->size){
-    for(size_t i = 0; i <= current; i++){
-      t = t->next;
-    }
-    tt = t->type;
-  }
-  else{
-    printf("Current + 1 is greater than lexer size\n");
-    exit(1);
-  }
-  return tt;
-}
-
 struct Token *expect(struct Lexer *l, enum Token_Type exp) {
   if (!l->hd) {
-    // TODO: error here
-    assert(0);
+    err("expect: hd is null");
   }
 
   struct Token *t = l->hd;
   if (t->type != exp) {
-    // TODO: error here
-    printf("Expected %s but got %s\n", enum_to_str(exp), enum_to_str(t->type));
-    assert(0);
+    err_wargs("Expected %s but got %s", enum_to_str(exp), enum_to_str(t->type));
   }
 
   l->hd = l->hd->next;
   return t;
 }
 
-struct Token *previous_token(struct Lexer *l, size_t current)
+struct Token *advance(struct Lexer *l)
 {
-  current = current - 1;
+  assert(l->hd);
   struct Token *t = l->hd;
-  if(current <= l->size){
-    for(size_t i = 0; i < current; i++){
-      t = t->next;
-    }
-  }
+  l->hd = l->hd->next;
   return t;
 }
 
-// Consumes a token
-int match(struct Lexer *l, size_t *current, enum Token_Type exp_typ)
+struct Expr *parse_primary_expr(struct Lexer *l)
 {
-  struct Token *t = l->hd;
-  
-  if(*current <= l->size){
-    for(size_t i = 0; i < *current; i++){
-      t = t->next;
-    }
-  }
-  
-  if(t->type == exp_typ){
-    return 1;
-  }
-  return 0;
-}
-
-struct Noctis_Type *parse_type(struct Lexer *l) {
   (void)l;
-  assert(0);
+  TODO;
 }
 
-// ["let", "mut", "x", ":", "int", "=", "1", "+", "2", ";"]
+struct Expr *parse_unary_expr(struct Lexer *l)
+{
+  (void)l;
+  TODO;
+}
+
+struct Expr *parse_multiplicative_expr(struct Lexer *l)
+{
+  (void)l;
+  TODO;
+}
+
+struct Expr *parse_additive_expr(struct Lexer *l)
+{
+  (void)l;
+  TODO;
+}
+
+struct Expr *parse_equalitive_expr(struct Lexer *l)
+{
+  (void)l;
+  TODO;
+}
+
+struct Expr *parse_logical_expr(struct Lexer *l)
+{
+  (void)l;
+  TODO;
+}
+
+struct Expr *parse_assignment_expr(struct Lexer *l)
+{
+  (void)l;
+  TODO;
+}
+
+struct Expr *parse_expr(struct Lexer *l)
+{
+  return parse_assignment_expr(l);
+}
+
+//let x: ptr int = &add
+
+struct Noctis_Type *parse_type(struct Lexer *l)
+{
+  struct Token *cur = advance(l);
+  switch (cur->type) {
+    case TOKEN_INT: return noctis_type_alloc(NOCTIS_TYPE_KIND_INT);
+    case TOKEN_FLOAT: TODO;
+    default: assert(0 && "unhandled type in parse_type");
+  }
+}
 
 struct Stmt_Let *parse_let(struct Lexer *l)
 {
-  int mut = 0;
-  struct Token *id = NULL;
+  int mut                  = 0;
+  struct Token *id         = NULL;
   struct Noctis_Type *type = NULL;
-  struct Expr *e = NULL;
+  struct Expr *e           = NULL;
 
   discard(l); // let
 
-  // TODO: Impliment mut
-  mut = peek(l, 0)->type == TOKEN_MUT;
+  mut = safe_peek(l, 0)->type == TOKEN_MUT;
   if (mut) {
     discard(l); // mut
   }
-  
+
   id = expect(l, TOKEN_IDENTIFIER);
   (void)expect(l, TOKEN_COLON);
-  //type = parse_type(l); // TODO: handle type parsing
-  discard(l); // TODO:REMOVEME: handle type parsing
+
+  type = parse_type(l);
   (void)expect(l, TOKEN_ASSIGN);
-  // e = parse_expr(l); // TODO: handle expression parsing
-  discard(l); // TODO:REMOVEME: handle expression parsing
+
+  e = parse_expr(l);
   (void)expect(l, TOKEN_SCOLON);
 
   struct Stmt_Let *s = (struct Stmt_Let *)stmt_alloc(STMT_TYPE_LET);
+
   s->mut = mut;
   s->id = id;
   s->type = type;
@@ -141,45 +142,26 @@ struct Stmt_Let *parse_let(struct Lexer *l)
 
 struct Stmt *parse_stmt(struct Lexer *l)
 {
-  if (l->hd->type == TOKEN_LET) {
-    struct Stmt *s = (struct Stmt *)parse_let(l);
-    return s;
+  switch (safe_peek(l, 0)->type) {
+    case TOKEN_LET: return (struct Stmt *)parse_let(l);
+    case TOKEN_FUNC: TODO;
+    case TOKEN_LCURLY: TODO;
+    default: assert(0 && "unhandled statement in parse_stmt");
   }
-  assert(0);
-  return NULL;
+
+  return NULL; // unreachable
 }
 
 struct Program *parse_program(struct Lexer *l)
 {
   struct Program *p = malloc(sizeof(struct Program));
-  // Quick and dirty fix later
-  p->stmts = malloc(sizeof(struct Stmt) * 8);
-  
-  p->len = 0, p->cap = 8;
-  
-  while (peek(l, 0) != NULL) {
-    if (p->len != 0)
-      printf("HERE: %d\n", (int)p->stmts[0]->type);
+  p->stmts = NULL;
+  p->len = 0, p->cap = 0;
+
+  while (safe_peek(l, 0) != NULL) {
     struct Stmt *s = parse_stmt(l);
-    p->stmts[p->len++] = s;
+    da_append(p->stmts, p->len, p->cap, s);
   }
 
   return p;
 }
-
-//======================= Expression Parsing
-
-/* void *parse_term(struct Lexer *l) */
-/* { */
-/*   struct Term  */
-
-
-/* void *parse_expression(struct Lexer *l) */
-/* { */
-/*   struct Expr e = parse_term(&l); */
-
-
-/* } */
-
-
-

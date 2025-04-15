@@ -1,6 +1,7 @@
 #ifndef UTILS_H
 #define UTILS_H
 
+#include <stdio.h>
 #include <stddef.h>
 
 // Macro to safely look at an index in an array safely
@@ -22,6 +23,33 @@
     } while (0)
 
 #define halt (exit(0))
+
+#define TODO                                                    \
+    fprintf(stderr, "!!! TODO: %s() !!!\n", __FUNCTION__);      \
+    exit(1);
+
+#define da_append(arr, len, cap, value)                       \
+    do {                                                      \
+        if ((len) >= (cap)) {                                 \
+            (cap) = (cap) == 0 ? 2 : (cap) * 2;               \
+            (arr) = realloc((arr), (cap) * sizeof((arr)[0])); \
+        }                                                     \
+        (arr)[(len)] = (value);                               \
+        (len) += 1;                                           \
+    } while (0)
+
+
+#define err_wargs(msg, ...)                                             \
+    do {                                                                \
+        fprintf(stderr, "error: " msg "\n", __VA_ARGS__);               \
+        exit(1);                                                        \
+    } while (0)
+
+#define err(msg)                                \
+    do {                                        \
+        fprintf(stderr, msg);                   \
+        exit(1);                                \
+    } while (0)
 
 void *s_malloc(size_t bytes);
 int streq(const char *s0, const char *s1);
