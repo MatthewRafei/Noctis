@@ -1,6 +1,7 @@
 // Global utility functions 
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 #include "utils.h"
 
@@ -12,4 +13,8 @@ void *s_malloc(size_t bytes)
         exit(1);
     }
     return p;
+}
+
+int streq(const char *s0, const char *s1) {
+    return !strcmp(s0, s1);
 }

@@ -4,4 +4,4 @@ export func add(a: int, b: int) -> int {
     return a + b;
 }
 
-export let PI: float = 3.14159;
+export const PI: float = 3.14159;
