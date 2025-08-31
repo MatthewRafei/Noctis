@@ -11,7 +11,25 @@
 #include "utils.h"
 #include "fnv-1a.h"
 
-#define INITAL_CAPACITY 256
+/*
+TODO:
+- Use fprintf(stderr, ...) for error messages.
+
+- Fix typo: INITIAL_CAPACITY → INITIAL_CAPACITY.
+
+- Only increment map->tbl.len for new keys, not replacements.
+- Check for allocation failures in _s_umap_node_create and handle gracefully.
+
+- Remove unnecessary casts in memcpy (use void*).
+
+- Use size_t for indices and lengths instead of int.
+
+- Improve documentation for ownership and parameters.
+
+- Add unit tests for edge cases and resizing.
+*/
+
+#define INITIAL_CAPACITY 1024
 
 struct S_Umap s_umap_create(s_umap_hash hash, size_t nodev_stride)
 {
@@ -19,10 +37,10 @@ struct S_Umap s_umap_create(s_umap_hash hash, size_t nodev_stride)
 
   struct S_Umap map = (struct S_Umap){
       .tbl = {
-          .nodes = (struct _S_Umap_Node **)calloc(INITAL_CAPACITY,
+          .nodes = (struct _S_Umap_Node **)calloc(INITIAL_CAPACITY,
                                                   sizeof(struct _S_Umap_Node *)),
           .len = 0,
-          .cap = INITAL_CAPACITY,
+          .cap = INITIAL_CAPACITY,
       },
       .hash = hash,
       .nodev_stride = nodev_stride,
@@ -72,7 +90,6 @@ static void node_free(struct _S_Umap_Node *n)
   free(n->key);
   free(n->value);
   free(n);
-  n = NULL;
 }
 
 void s_umap_insert(struct S_Umap *map, char *key, void *value)
@@ -124,7 +141,7 @@ void s_umap_free(struct S_Umap *map)
   free(map->tbl.nodes);
 }
 
-void *s_umap_get(const struct S_Umap *map, char *key)
+void *s_umap_get(const struct S_Umap *map, const char *key)
 {
   unsigned long idx = map->hash(key) % map->tbl.cap;
 
@@ -142,7 +159,7 @@ void *s_umap_get(const struct S_Umap *map, char *key)
   return NULL;
 }
 
-int s_umap_contains(const struct S_Umap *map, char *key)
+int s_umap_contains(const struct S_Umap *map, const char *key)
 {
   return s_umap_get(map, key) != NULL;
 }
@@ -153,14 +170,14 @@ int s_umap_contains(const struct S_Umap *map, char *key)
 */
 void s_umap_print(struct S_Umap *map, void (*vp)(const void *))
 {
-  int len = map->tbl.cap;
-  printf("The len of the table: %ld\n", map->tbl.len);
-  for (int i = 0; i < len; i++)
+  size_t len = map->tbl.cap;
+  printf("The len of the table: %zu\n", map->tbl.len);
+  for (size_t i = 0; i < len; i++)
   {
     if (map->tbl.nodes[i])
     {
       struct _S_Umap_Node *tmp = map->tbl.nodes[i];
-      printf("Keys for nodes[%d]: ", i);
+      printf("Keys for nodes[%zu]: ", i);
       while (tmp)
       {
         printf("(\"%s\"", tmp->key);
@@ -181,4 +198,5 @@ void s_umap_print(struct S_Umap *map, void (*vp)(const void *))
       }
     }
   }
+  printf("\n");
 }

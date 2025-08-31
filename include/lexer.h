@@ -10,5 +10,6 @@ struct Lexer {
 
 struct Lexer lex_file(char *src, const char *fp);
 void lexer_dump(const struct Lexer *l);
+void lexer_free(struct Lexer *l);
 
 #endif // LEXER_H

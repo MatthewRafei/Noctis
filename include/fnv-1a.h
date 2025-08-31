@@ -3,5 +3,4 @@
 
 unsigned long fnv1a(const char* key);
 
-
 #endif

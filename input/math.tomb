@@ -1,4 +1,4 @@
-module math; -- must declare module with .lib extension 
+module math; -- must declare module with .tomb extension 
 
 export func add(a: int, b: int) -> int {
     return a + b;

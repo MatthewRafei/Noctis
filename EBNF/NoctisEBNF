@@ -1,0 +1,57 @@
+program = { declaration | function | import_stmt | comment } ;
+
+import_stmt = "import" identifier ".tomb" [ "::" "{" identifier { "," identifier } "}" ] ";" ;
+
+declaration = "let" [ "mut" ] identifier ":" type "=" expression ";" ;
+
+function = [ "export" ] "func" identifier "(" [ parameter { "," parameter } ] ")" "->" type "{" { statement } "}" ;
+
+parameter = identifier ":" type ;
+
+type = "int" | "string" | "unit" | "float" | "bool" ;
+
+statement = declaration
+          | if_stmt
+          | while_stmt
+          | for_stmt
+          | expression ";" ;
+
+if_stmt = "if" expression "{" { statement } "}" [ "else" "{" { statement } "}" ] ;
+
+while_stmt = "while" expression "{" { statement } "}" ;
+
+for_stmt = "for" identifier ":" type "=" expression ";" expression ";" expression "{" { statement } "}" ;
+
+expression = comparison ;
+
+comparison = addition { ("==" | "!=" | ">" | "<") addition } ;
+
+addition = multiplication { ("+" | "-") multiplication } ;
+
+multiplication = unary { ("*" | "/") unary } ;
+
+unary = [ unary_op ] primary ;
+
+primary = literal
+        | identifier
+        | identifier "(" [ expression { "," expression } ] ")"
+        | "(" expression ")" ;
+
+literal = integer | string | "true" | "false" ;
+
+unary_op = "-" | "!" | "&" | "&mut" ;
+
+binary_op = "+" | "-" | "*" | "/" | "==" | "!=" | ">" | "<" ;
+
+identifier = letter { letter | digit } ;
+
+integer = [ "-" ] digit { digit } ;
+
+string = "\"" { char | "\\" char } "\"" ;
+
+comment = "--" { char } "\n"
+        | "(*" { char } "*)" ;
+
+letter = "a".."z" | "A".."Z" | "_" ;
+digit = "0".."9" ;
+char = any_character_except_newline_or_quote ;

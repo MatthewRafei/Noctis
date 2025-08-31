@@ -11,6 +11,26 @@
 #include "utils.h"
 #include "fnv-1a.h"
 
+#define DEBUG 1
+
+/*
+TODO:
+
+- Add more unit tests for edge cases (unterminated strings, comments, etc.).
+
+- Refactor error handling to avoid exit() calls; return error codes or use callbacks.
+- Use fprintf(stderr, ...) for error messages instead of printf.
+- Handle nested multi-line comments or provide clearer error recovery.
+- Improve comments and error messages for maintainability.
+
+- Support escape sequences in string and character literals.
+- Make character literals distinct from string literals.
+
+- Benchmark and possibly replace consume_while with strspn for performance.
+- Consider dynamic allocation for buffers (e.g., in determine_symbol).
+- Improve predicate logic for operators (not_sym may miss cases).
+*/
+
 static struct S_Umap init_sym_keyword_tbl(void) {
   struct S_Umap tbl = s_umap_create(fnv1a, sizeof(enum Token_Type));
 
@@ -23,12 +43,12 @@ static struct S_Umap init_sym_keyword_tbl(void) {
     "*",  "/",           // TOKEN_STAR, TOKEN_SLASH
     "^",  "%",           // TOKEN_CARET, TOKEN_MOD
     ":",  "?",           // TOKEN_COLON, TOKEN_QUESTION
-    "~",                 // TOKEN_NOT
+    "!",                 // TOKEN_NOT
     ">",  "<",           // TOKEN_GT, TOKEN_LT
     ";",  "&",           // TOKEN_SCOLON, TOKEN_AND
     ">=", "<=",          // TOKEN_GE, TOKEN_LE
     "~=", "==",          // TOKEN_NE, TOKEN_EQ
-    "=",                 // TOKEN_ASSIGN
+    "=",  "!=",          // TOKEN_ASSIGN, TOKEN_NOTEQ
     ">>", "<<",          // TOKEN_GTGT, TOKEN_LTLT
     "->",                // TOKEN_ARROW
   };
@@ -40,15 +60,10 @@ static struct S_Umap init_sym_keyword_tbl(void) {
 
   // Keywords
   char *kws[] = KEYWORD_ASCPL;
-  
-  // DEBUG PRINT
-  for (size_t i = 0; i < (sizeof(syms)/sizeof(*syms)); ++i) {
-    printf("Symbol: %s -> Token: %d\n",
-	   syms[i],
-	   *(enum Token_Type *)s_umap_get(&tbl, syms[i]));
-  }
-  printf("\n");
 
+  
+  // If this fails its probably because you removed something in either keywords.h, token.h, or token.c
+  // And did not make that change across all those three files
   assert(sizeof(kws)/sizeof(*kws) == (TOKEN_KEYWORD_LEN - TOKEN_SYMBOL_LEN) - 1);
 
   for (size_t i = 0; i < sizeof(kws)/sizeof(*kws); ++i) {
@@ -64,14 +79,23 @@ static struct S_Umap init_sym_keyword_tbl(void) {
   }
 
   // DEBUG PRINT
-  for (size_t i = 0; i < sizeof(kws)/sizeof(*kws); ++i) {
-    printf("Keyword: %s -> Token: %d\n",
-           kws[i],
-           *(enum Token_Type *)s_umap_get(&tbl, kws[i])
-    );
+  if(DEBUG){
+    for (size_t i = 0; i < (sizeof(syms)/sizeof(*syms)); ++i) {
+    printf("Symbol: %s -> Token: %d\n",
+      syms[i],
+      *(enum Token_Type *)s_umap_get(&tbl, syms[i]));
+    }
+    printf("\n");
+
+    for (size_t i = 0; i < sizeof(kws)/sizeof(*kws); ++i) {
+      printf("Keyword: %s -> Token: %d\n",
+      kws[i],
+      *(enum Token_Type *)s_umap_get(&tbl, kws[i]));
+    }
+    printf("\n");
   }
-  printf("\n");
-  
+  // END DEBUG PRINT
+
   return tbl;
 }
 
@@ -130,7 +154,7 @@ int not_whitespace(int c)
 }
 
 // might not fully capture cases like <=, >=, or ==.
-// You may want a specialized predicate for operators instead of relying on not_sym.
+// May want a specialized predicate for operators instead of relying on not_sym.
 int not_sym(int c)
 {
   return !isalnum(c) && c != '_' && c != ' ' && c != '\n' && c != '\t' && c != '\r';
@@ -140,7 +164,6 @@ int is_identifier(int c)
 {
   return isalnum(c) || c == '_';
 }
-
 
 enum Token_Type *determine_symbol(const char *s,
 				  size_t op_len,
@@ -217,7 +240,10 @@ struct Lexer lex_file(char *src, const char *fp)
         c_counter += 1;
 
         if(src[i+counter] == '(' && src[i+counter+1] == '*'){
-          printf("Nested multi-comment at file: \"%s\" on row: %ld col: %ld\n", fp, row, col);
+          printf("Nested multi-line comments are not supported\n");
+          printf("Nested multi-line comment at file: \"%s\" on row: %ld col: %ld\n", fp, row, col);
+
+          // Better error handling please
           exit(1);
         }
       }
@@ -248,7 +274,7 @@ struct Lexer lex_file(char *src, const char *fp)
 
       // Use len to create a substring to search
       // for keywords in the hash table
-      //char substring[len + 1];
+      // char substring[len + 1];
       char *substring = s_malloc(len+1);
       memcpy(substring, src + i, len);
       substring[len] = '\0';
@@ -293,8 +319,8 @@ struct Lexer lex_file(char *src, const char *fp)
       i += len + 1;
       col += len + 1; 
     }
-    ////////////////////////////////////////////////////////////////////////////////////
-    // Numbers & for loop ranges
+  
+    // Numbers
     else if(isdigit(ch)){
       size_t len = consume_while(src+i, isdigit);
       if (SAFE_PEEK(src, i + len, '.') && !SAFE_PEEK(src, i + len + 1, '.')) {
@@ -321,16 +347,6 @@ struct Lexer lex_file(char *src, const char *fp)
       col += 2;
     }
 
-    // How the h*** is the arrow operator hitting this condition?
-    // Added the conditional above this one so it would hit first....
-    // But Im keeping my eye on you lol
-    else if(ch == '.' && SAFE_PEEK(src, i+1, '.')){
-      struct Token *t = token_alloc(TOKEN_FOR_RANGE, src+i, 2, fp, row, col);
-      lexer_append(&lexer, t);
-      i += 2;
-      col += 2;
-    }
-
     else if(ch == '.' && src[i+1] && isdigit(src[i+1])){
       size_t len = consume_while(src+i+1, isdigit);
       struct Token *t = token_alloc(TOKEN_FLOAT_LIT, src+i, len, fp, row, col);
@@ -339,7 +355,6 @@ struct Lexer lex_file(char *src, const char *fp)
       col += 2;
     }
 
-    ///////////////////////////////////////////////////////////////////////////////////
     // Operators
     else {
       size_t op_len = consume_while(src + i, not_sym);
@@ -347,7 +362,7 @@ struct Lexer lex_file(char *src, const char *fp)
       enum Token_Type *type = determine_symbol(src+i, op_len, &sym_keyword_tbl, &len);
 
       if (!type) {
-        err_wargs("invalid type at: %s\n", src + i);
+        err_wargs("invalid type at: %s\n on row: %ld col: %ld", src + i, row, col);
       }
 
       struct Token *t = token_alloc(*type, src + i, len, fp, row, col);
@@ -357,7 +372,21 @@ struct Lexer lex_file(char *src, const char *fp)
       col += len;
     }
   }
+  s_umap_print(&sym_keyword_tbl, NULL);
   // Free hash-table
   s_umap_free(&sym_keyword_tbl);
   return lexer;
+}
+
+void lexer_free(struct Lexer *l)
+{
+  struct Token *node = l->hd;
+  while(node){
+    struct Token *n = node->next;
+    if(node->lexeme) free(node->lexeme);
+    free(node);
+    node = n;
+  }
+  l->hd = l->tl = NULL;
+  l->size = 0;
 }

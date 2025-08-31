@@ -22,7 +22,7 @@ enum Token_Type {
   TOKEN_MOD,       // %
   TOKEN_COLON,     // :
   TOKEN_QUESTION,  // ?
-  TOKEN_NOT,       // ~
+  TOKEN_NOT,       // !
   TOKEN_GT,        // >
   TOKEN_LT,        // <
   TOKEN_SCOLON,    // ;
@@ -34,9 +34,9 @@ enum Token_Type {
   TOKEN_NE,        // ~=
   TOKEN_EQ,        // ==
   TOKEN_ASSIGN,    // =
+  TOKEN_NOTEQ,     // !=
   TOKEN_GTGT,      // >>
   TOKEN_LTLT,      // <<
-  TOKEN_FOR_RANGE, // {num}..{num}
   TOKEN_ARROW,     // ->
   TOKEN_SYMBOL_LEN,// DO NOT USE
 
@@ -51,7 +51,6 @@ enum Token_Type {
   TOKEN_DO,
   TOKEN_FOR,
   TOKEN_FUNC,
-  TOKEN_NULL,
   TOKEN_RETURN,
   TOKEN_IMPORT,
   TOKEN_EXPORT,
@@ -62,7 +61,6 @@ enum Token_Type {
   TOKEN_UNIT,
   TOKEN_LET,
   TOKEN_MUT,
-  TOKEN_IN,
   TOKEN_KEYWORD_LEN, // DO NOT USE
 
   // Literals
@@ -81,7 +79,7 @@ struct Token {
 };
 
 struct Token *token_alloc(enum Token_Type type,
-                          char *lexeme,
+                          const char *lexeme,
                           size_t end,
                           const char *fp,
                           size_t row, size_t col);

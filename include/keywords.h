@@ -11,7 +11,6 @@
 #define KEYWORD_DO      "do"
 #define KEYWORD_FOR     "for"
 #define KEYWORD_FUNC    "func"
-#define KEYWORD_NULL    "NULL"
 #define KEYWORD_RETURN  "return"
 #define KEYWORD_IMPORT  "import"
 #define KEYWORD_EXPORT  "export"
@@ -22,7 +21,6 @@
 #define KEYWORD_UNIT    "unit"
 #define KEYWORD_LET     "let"
 #define KEYWORD_MUT     "mut"
-#define KEYWORD_IN      "in"
 
 // Keyword as compound literal 
 // We can make an array of keywords
@@ -38,7 +36,6 @@
     KEYWORD_DO,					\
     KEYWORD_FOR,				\
     KEYWORD_FUNC,				\
-    KEYWORD_NULL,				\
     KEYWORD_RETURN,				\
     KEYWORD_IMPORT,				\
     KEYWORD_EXPORT,				\
@@ -49,7 +46,6 @@
     KEYWORD_UNIT,				\
     KEYWORD_LET,				\
     KEYWORD_MUT, 				\
-    KEYWORD_IN,					\
 }
 
 #endif // KEYWORDS_H

@@ -6,6 +6,18 @@
 #include "token.h"
 #include "utils.h"
 
+/*
+TODO:
+- Refactor enum_to_str using a mapping array for better scalability and maintainability.
+- Add error checks for memory allocation in token_alloc (handle strndup and s_malloc failures).
+- Use const char * for lexeme and fp parameters in token_alloc for clarity.
+- Consider copying fp in token_alloc if ownership/lifetime is not guaranteed.
+- Add a debug flag or macro to control token_dump output in production builds.
+- Fix any typos in enum names (e.g., TOKEN_SCOLON → TOKEN_SEMICOLON for consistency).
+- Add brief documentation/comments for each function.
+- Add unit tests for token allocation
+*/
+
 // Refactor enum_to_str using a mapping array for better scalability.
 char *enum_to_str(enum Token_Type type) {
   switch(type) {
@@ -57,6 +69,8 @@ char *enum_to_str(enum Token_Type type) {
     return "TOKEN_EQ";
   case TOKEN_ASSIGN:
     return "TOKEN_ASSIGN";
+  case TOKEN_NOTEQ:
+    return "TOKEN_NOTEQ";
   case TOKEN_GTGT:
     return "TOKEN_GTGT";
   case TOKEN_LTLT:
@@ -85,14 +99,12 @@ char *enum_to_str(enum Token_Type type) {
     return "TOKEN_OR";
   case TOKEN_WHILE:
     return "TOKEN_WHILE";
-  case TOKEN_DO:
-    return "TOKEN_DO";
   case TOKEN_FOR:
     return "TOKEN_FOR";
+  case TOKEN_DO:
+    return "TOKEN_DO";
   case TOKEN_FUNC:
     return "TOKEN_FUNC";
-  case TOKEN_NULL:
-    return "TOKEN_NULL";
   case TOKEN_RETURN:
     return "TOKEN_RETURN";
   case TOKEN_SCOLON:
@@ -113,10 +125,6 @@ char *enum_to_str(enum Token_Type type) {
     return "TOKEN_LET";
   case TOKEN_MUT:
     return "TOKEN_MUT";
-  case TOKEN_IN:
-    return "TOKEN_IN";
-  case TOKEN_FOR_RANGE:
-    return "TOKEN_FOR_RANGE";
   case TOKEN_ARROW:
     return "TOKEN_ARROW";
   default:
@@ -127,7 +135,7 @@ char *enum_to_str(enum Token_Type type) {
 }
 
 struct Token *token_alloc(enum Token_Type type,
-                          char *lexeme,
+                          const char *lexeme,
                           size_t end,
                           const char *fp,
                           size_t row, size_t col)
@@ -141,6 +149,7 @@ struct Token *token_alloc(enum Token_Type type,
   token->fp = fp;
   token->row = row;
   token->col = col;
+  token->next = NULL;
 
   return token;
 }
@@ -151,4 +160,3 @@ void token_dump(const struct Token *t)
     printf("[lexeme: %-20s \t type: %-20s \t filepath: %-30s \t row: %-3zu \t col: %-3zu]\n",
            t->lexeme, enum_to_str(t->type), t->fp, t->row, t->col);
 }
-

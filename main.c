@@ -3,12 +3,17 @@
 
 #include "lexer.h"
 
-// Parser use type pruning
+/*
+TODO:
+- Refactor error handling for consistency (prefer returning error codes or using EXIT_FAILURE).
+- Fix typos and use more formal comments.
+- CHECK: Check ftell(file) for < 0 before casting to size_t.
+- Use fprintf(stderr, ...) for error output.
+- Consider future multi-file support in argument parsing.
 
-// This is to test keyword ascpl
-// delete after done
-#include "keywords.h"
-#include "ds/s-umap.h"
+- Implement multi-file support
+
+*/
 
 char *file_to_str(const char *fp)
 {
@@ -25,7 +30,14 @@ char *file_to_str(const char *fp)
     return NULL;
   }
 
+  if (ftell(file) < 0) {
+    perror("Failed to determine file length");
+    fclose(file);
+    return NULL;
+  }
+
   size_t length = ftell(file);
+
   // Some file-systems might return -1
   if(length == (size_t)-1){
     printf("Failed to determine file length\n");
@@ -60,10 +72,9 @@ char *file_to_str(const char *fp)
 
 int help(void)
 {
-  // Impliment multi-file support
   printf("Usage: noctis <filepath>\n");
-  //exit(1);
-  return 1;
+  //return 1;
+  exit(1);
 }
 
 int main(int argc, char *argv[])
@@ -86,12 +97,7 @@ int main(int argc, char *argv[])
   lexer_dump(&lexer);
   printf("\nWhat is lexer size: %ld\n", lexer.size);
 
-  // Parser
-  /* struct Parser parser = parse_lexer(&lexer); */
-  /* parser_dump(&parser); */
-
-  
-
+  lexer_free(&lexer);
   free(src);
   return 0;
 }
