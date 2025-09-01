@@ -61,7 +61,7 @@ static struct S_Umap init_sym_keyword_tbl(void) {
     "~=", "==",          // TOKEN_NE, TOKEN_EQ
     "=",  "!=",          // TOKEN_ASSIGN, TOKEN_NOTEQ
     ">>", "<<",          // TOKEN_GTGT, TOKEN_LTLT
-    "->",                // TOKEN_ARROW
+    "->",                // TOKEN_ARline
   };
 
   for (size_t i = 0; i < (sizeof(syms) / sizeof(*syms)); ++i) {
@@ -226,7 +226,7 @@ struct Lexer lex_file(char *src, const char *fp)
     .tl = NULL,
   };
 
-  size_t i = 0, row = 1, col = 1;
+  size_t i = 0, line = 1, col = 1;
   while(src[i] != '\0'){
     char ch = src[i];
     
@@ -238,7 +238,7 @@ struct Lexer lex_file(char *src, const char *fp)
     // Skip newline and carriage return
     else if(ch == '\n' || ch == '\r') {
       i += 1;
-      row += 1;
+      line += 1;
       col = 1;
     }
 
@@ -257,7 +257,7 @@ struct Lexer lex_file(char *src, const char *fp)
 
         if(src[i+counter] == '(' && src[i+counter+1] == '*'){
           printf("Nested multi-line comments are not supported\n");
-          printf("Nested multi-line comment at file: \"%s\" on row: %ld col: %ld\n", fp, row, col);
+          printf("Nested multi-line comment at file: \"%s\" on line: %ld col: %ld\n", fp, line, col);
 
           // Better error handling please
           exit(1);
@@ -265,20 +265,20 @@ struct Lexer lex_file(char *src, const char *fp)
       }
       // What is string is not Buffer Null-Termination?
       if(!src[i+counter]){
-        printf("unterminated comment at file: \"%s\" on row: %ld col: %ld\n", fp, row, col);
+        printf("unterminated comment at file: \"%s\" on line: %ld col: %ld\n", fp, line, col);
         exit(1);
       }
 
       // 2 because we need to skip '*)'
       i += counter + 2;
-      row += r_counter;
+      line += r_counter;
       col = 1 + c_counter;
     }
 
     // Single-line comment
     else if(ch == '-' && SAFE_PEEK(src, i+1, '-')){
       size_t len = consume_while(src + i, not_newline);
-      // No need to update to row
+      // No need to update to line
       // because skip newline will take care of it
       i += len;
       col = 1;
@@ -298,12 +298,12 @@ struct Lexer lex_file(char *src, const char *fp)
       enum Token_Type *type = (enum Token_Type *)s_umap_get(&sym_keyword_tbl, substring);
 
       if (type != NULL) {
-        struct Token *t = token_alloc(*type, src+i, len, fp, row, col);
+        struct Token *t = token_alloc(*type, src+i, len, fp, line, col);
         lexer_append(&lexer, t);
         i += len, col += len;
       }
       else{
-        struct Token *t = token_alloc(TOKEN_IDENTIFIER, src+i, len, fp, row, col);
+        struct Token *t = token_alloc(TOKEN_IDENTIFIER, src+i, len, fp, line, col);
         lexer_append(&lexer, t);
         i += len, col += len;
       }
@@ -323,11 +323,11 @@ struct Lexer lex_file(char *src, const char *fp)
       // You reference closing_quote in the string literal parsing, but it's not defined.
       // You should ensure that you compare against ch, which holds the opening quote:
       if (src[i + len] != ch) {
-        printf("Unterminated string at file: \"%s\" on row: %ld col: %ld\n", fp, row, col);
+        printf("Unterminated string at file: \"%s\" on line: %ld col: %ld\n", fp, line, col);
         exit(1);
       }
 
-      struct Token *t = token_alloc(TOKEN_STRING_LIT, src+i, len, fp, row, col);
+      struct Token *t = token_alloc(TOKEN_STRING_LIT, src+i, len, fp, line, col);
 
       lexer_append(&lexer, t);
 
@@ -343,13 +343,13 @@ struct Lexer lex_file(char *src, const char *fp)
         // We found a decimal point followed by a digit -> It's a float!
         len += 1;  // Account for the decimal point
         len += consume_while(src + i + len, isdigit);  // Consume decimal part
-        struct Token *t = token_alloc(TOKEN_FLOAT_LIT, src + i, len, fp, row, col);
+        struct Token *t = token_alloc(TOKEN_FLOAT_LIT, src + i, len, fp, line, col);
         lexer_append(&lexer, t);
         i += len;
         col += len;
       }
       else{
-        struct Token *t = token_alloc(TOKEN_INT_LIT, src+i, len, fp, row, col);
+        struct Token *t = token_alloc(TOKEN_INT_LIT, src+i, len, fp, line, col);
         lexer_append(&lexer, t);
         i += len;
         col += len;
@@ -357,7 +357,7 @@ struct Lexer lex_file(char *src, const char *fp)
     }
 
     else if(ch == '-' && SAFE_PEEK(src, i+1, '>')){
-      struct Token *t = token_alloc(TOKEN_ARROW, src+i, 2, fp, row, col);
+      struct Token *t = token_alloc(TOKEN_ARROW, src+i, 2, fp, line, col);
       lexer_append(&lexer, t);
       i += 2;
       col += 2;
@@ -365,7 +365,7 @@ struct Lexer lex_file(char *src, const char *fp)
 
     else if(ch == '.' && src[i+1] && isdigit(src[i+1])){
       size_t len = consume_while(src+i+1, isdigit);
-      struct Token *t = token_alloc(TOKEN_FLOAT_LIT, src+i, len, fp, row, col);
+      struct Token *t = token_alloc(TOKEN_FLOAT_LIT, src+i, len, fp, line, col);
       lexer_append(&lexer, t);
       i += len;
       col += 2;
@@ -378,10 +378,10 @@ struct Lexer lex_file(char *src, const char *fp)
       enum Token_Type *type = determine_symbol(src+i, op_len, &sym_keyword_tbl, &len);
 
       if (!type) {
-        err_wargs("invalid type at: %s\n on row: %ld col: %ld", src + i, row, col);
+        err_wargs("invalid type at: %s\n on line: %ld col: %ld", src + i, line, col);
       }
 
-      struct Token *t = token_alloc(*type, src + i, len, fp, row, col);
+      struct Token *t = token_alloc(*type, src + i, len, fp, line, col);
       lexer_append(&lexer, t);
 
       i += len;
