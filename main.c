@@ -36,7 +36,7 @@ char *file_to_str(const char *fp)
     return NULL;
   }
 
-  size_t length = ftell(file);
+  size_t length = (size_t)ftell(file);
 
   // Some file-systems might return -1
   if(length == (size_t)-1){

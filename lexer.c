@@ -23,6 +23,17 @@ TODO:
 - Handle nested multi-line comments or provide clearer error recovery.
 - Improve comments and error messages for maintainability.
 
+- Common escape sequences to support:
+\n: Represents a newline character.
+\t: Represents a horizontal tab character.
+\r: Represents a carriage return character.
+\\: Represents a literal backslash character.
+\": Represents a literal double quote character within a string enclosed in double quotes. 
+\': Represents a literal single quote character within a string.
+\b: Represents a backspace character.
+\f: Represents a form feed character.
+\v: Represents a vertical tab character.
+
 - Support escape sequences in string and character literals.
 - Make character literals distinct from string literals.
 
@@ -80,18 +91,23 @@ static struct S_Umap init_sym_keyword_tbl(void) {
 
   // DEBUG PRINT
   if(DEBUG){
-    for (size_t i = 0; i < (sizeof(syms)/sizeof(*syms)); ++i) {
+    for (size_t i = 0; i < (sizeof(syms)/sizeof(*syms)); i++) {
     printf("Symbol: %s -> Token: %d\n",
       syms[i],
       *(enum Token_Type *)s_umap_get(&tbl, syms[i]));
     }
     printf("\n");
+    printf("There are %zu symbols in the language", (sizeof(syms)/sizeof(*syms)));
+    printf("\n");
+    printf("\n");
 
-    for (size_t i = 0; i < sizeof(kws)/sizeof(*kws); ++i) {
+    for (size_t i = 0; i < sizeof(kws)/sizeof(*kws); i++) {
       printf("Keyword: %s -> Token: %d\n",
       kws[i],
       *(enum Token_Type *)s_umap_get(&tbl, kws[i]));
     }
+    printf("\n");
+    printf("There are %zu keywords in the language", sizeof(kws)/sizeof(*kws));
     printf("\n");
   }
   // END DEBUG PRINT

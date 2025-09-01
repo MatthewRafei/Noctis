@@ -22,8 +22,6 @@ TODO:
 
 - Remove unnecessary casts in memcpy (use void*).
 
-- Use size_t for indices and lengths instead of int.
-
 - Improve documentation for ownership and parameters.
 
 - Add unit tests for edge cases and resizing.
@@ -171,7 +169,9 @@ int s_umap_contains(const struct S_Umap *map, const char *key)
 void s_umap_print(struct S_Umap *map, void (*vp)(const void *))
 {
   size_t len = map->tbl.cap;
+  printf("\n");
   printf("The len of the table: %zu\n", map->tbl.len);
+  printf("\n");
   for (size_t i = 0; i < len; i++)
   {
     if (map->tbl.nodes[i])
