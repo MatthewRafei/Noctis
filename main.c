@@ -2,6 +2,9 @@
 #include <stdlib.h>
 
 #include "lexer.h"
+#include "context.h"
+#include "diagnostic.h"
+#include "io.h"
 
 // dependency: libubsan
 
@@ -13,75 +16,16 @@ TODO:
 - Fix typos and use more formal comments.
 
 - Implement multi-file support
-
 */
-
-char *file_to_str(const char *fp)
-{
-  FILE *file = fopen(fp, "rb");
-
-  if (!file) {
-    perror("Failed to open file");
-    exit(1);
-  }
-
-  if (fseek(file, 0, SEEK_END) != 0){
-    perror("Failed to seek file");
-    fclose(file);
-    return NULL;
-  }
-
-  if (ftell(file) < 0) {
-    perror("Failed to determine file length");
-    fclose(file);
-    return NULL;
-  }
-
-  size_t length = (size_t)ftell(file);
-
-  // Some file-systems might return -1
-  if(length == (size_t)-1){
-    printf("Failed to determine file length\n");
-    fclose(file);
-    return NULL;
-  }
-
-  rewind(file);
-
-  // No need to cast char* as malloc's return type
-  // is already void *
-  char *buffer = malloc(length + 1);
-  if (!buffer) {
-    perror("Failed to allocate memory");
-    fclose(file);
-    return NULL;
-  }
-
-  //Free buffer if fread fails
-  size_t read_size = fread(buffer, 1, length, file);
-  if(read_size != (size_t)length){
-    perror("Failed to read file");
-    free(buffer);
-    fclose(file);
-    return NULL;
-  }
-
-  buffer[length] = '\0';
-  fclose(file);
-  return buffer;
-}
-
-int help(void)
-{
-  printf("Usage: noctis <filepath>\n");
-  //return 1;
-  exit(1);
-}
 
 int main(int argc, char *argv[])
 {
+  struct CompilerContext context = create_compiler_context();
+
   if (argc < 2) {
-    help();
+    // fprintf(stderr, "Usage: noctis <filepath>\n");
+    // help();
+    exit(1);
   }
 
   const char *fp = argv[1];
@@ -94,11 +38,15 @@ int main(int argc, char *argv[])
   }
 
   // Lexer
-  struct Lexer lexer = lex_file(src, fp);
+  struct Lexer lexer = lex_file(src, fp, context);
   lexer_dump(&lexer);
   printf("\nWhat is lexer size: %ld\n", lexer.size);
 
+  // Temp diagnostic error messages
+  printf("Warning: %s:%zu:%zu: %s\n", context.message_array[0].file, context.message_array[0].line, context.message_array[0].col, context.message_array[0].fmt);
+
   lexer_free(&lexer);
+  free_diagnostic_message_dynarray(context.message_array);
   free(src);
   return 0;
 }

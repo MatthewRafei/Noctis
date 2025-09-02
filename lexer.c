@@ -11,8 +11,9 @@
 #include "utils.h"
 #include "fnv-1a.h"
 #include "diagnostic.h"
+#include "context.h"
 
-#define DEBUG 0
+#define DEBUG 1
 
 /*
 TODO:
@@ -218,7 +219,7 @@ int not_quote(int c)
   return c != '"' && c != '\'';
 }
 
-struct Lexer lex_file(char *src, const char *fp)
+struct Lexer lex_file(char *src, const char *fp, struct CompilerContext context)
 {
   struct S_Umap sym_keyword_tbl = init_sym_keyword_tbl();
 
@@ -257,7 +258,7 @@ struct Lexer lex_file(char *src, const char *fp)
         c_counter += 1;
 
         if(src[i+counter] == '(' && src[i+counter+1] == '*'){
-          report_error(__FILE__, line, col, WARNING, "Nested multi-line comments are not supported.\n");
+          report_error(__FILE__, line, col, WARNING, "Nested multi-line comments are not supported.\n", &context);
         }
       }
       // What if string is not Buffer Null-Termination?
