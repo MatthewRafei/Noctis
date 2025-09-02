@@ -1,0 +1,7 @@
+-- Hello
+
+let x: int = 3;
+
+(*(**)*)
+
+let y: bool = true;

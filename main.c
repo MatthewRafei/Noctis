@@ -3,13 +3,14 @@
 
 #include "lexer.h"
 
+// dependency: libubsan
+
 /*
 TODO:
 - Refactor error handling for consistency (prefer returning error codes or using EXIT_FAILURE).
-- Fix typos and use more formal comments.
-- CHECK: Check ftell(file) for < 0 before casting to size_t.
 - Use fprintf(stderr, ...) for error output.
-- Consider future multi-file support in argument parsing.
+
+- Fix typos and use more formal comments.
 
 - Implement multi-file support
 
@@ -88,8 +89,8 @@ int main(int argc, char *argv[])
 
   // check source before calling lex_file
   if(!src){
-    // Maybe replace with better error handling
-    return 1; // Exit gracefully, you OG
+    // Replace with better error handling
+    return 1; // Exit gracefully.
   }
 
   // Lexer

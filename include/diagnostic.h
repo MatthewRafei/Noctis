@@ -5,4 +5,12 @@ enum ErrorLevel {
     FATAL
 };
 
-void report_error(const char *file, const int row, const int col, const enum ErrorLevel level, const char *fmt);
+struct DiagnosticMessage {
+    const char *file;
+    size_t line;
+    size_t col;
+    enum ErrorLevel level;
+    const char *fmt;
+};
+
+void report_error(const char *file, const size_t line, const size_t col, const enum ErrorLevel level, const char *fmt);

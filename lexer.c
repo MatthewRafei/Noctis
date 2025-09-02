@@ -10,8 +10,9 @@
 #include "token.h"
 #include "utils.h"
 #include "fnv-1a.h"
+#include "diagnostic.h"
 
-#define DEBUG 1
+#define DEBUG 0
 
 /*
 TODO:
@@ -256,14 +257,10 @@ struct Lexer lex_file(char *src, const char *fp)
         c_counter += 1;
 
         if(src[i+counter] == '(' && src[i+counter+1] == '*'){
-          printf("Nested multi-line comments are not supported\n");
-          printf("Nested multi-line comment at file: \"%s\" on line: %ld col: %ld\n", fp, line, col);
-
-          // Better error handling please
-          exit(1);
+          report_error(__FILE__, line, col, WARNING, "Nested multi-line comments are not supported.\n");
         }
       }
-      // What is string is not Buffer Null-Termination?
+      // What if string is not Buffer Null-Termination?
       if(!src[i+counter]){
         printf("unterminated comment at file: \"%s\" on line: %ld col: %ld\n", fp, line, col);
         exit(1);
@@ -312,7 +309,7 @@ struct Lexer lex_file(char *src, const char *fp)
     }
 
     // TODO: Make it so that character literals are their own thing.
-    // TODO: Escape sequences in strings?
+    // TODO: Escape sequences
     else if (ch == '"' || ch == '\'') {
 
       i += 1, col += 1; // " or '
@@ -389,7 +386,6 @@ struct Lexer lex_file(char *src, const char *fp)
     }
   }
   s_umap_print(&sym_keyword_tbl, NULL);
-  // Free hash-table
   s_umap_free(&sym_keyword_tbl);
   return lexer;
 }
