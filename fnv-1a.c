@@ -1,8 +1,8 @@
-#include <stdlib.h>
-#include <stdio.h>
 #include <stddef.h>
-#include <string.h>
 #include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 /*
 TODO:
@@ -14,7 +14,8 @@ TODO:
 uint32_t fnv1a(const char* key)
 {
   if(!key){
-    fprintf(stderr, "Error key is null");
+    // TODO(malac0da): Handle null key case in diag system
+    (void)fprintf(stderr, "Error key is null");
     exit(EXIT_FAILURE);
   }
 

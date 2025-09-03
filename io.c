@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-// TODO: Replace all error messages with diagnostic reporting
+// TODO(malac0da): Replace all error messages with diagnostic reporting
 
 char *file_to_str(const char *fp)
 {

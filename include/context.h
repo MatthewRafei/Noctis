@@ -20,7 +20,7 @@ struct CompilerContext {
   size_t num_of_errors;
 };
 
-struct CompilerContext create_compiler_context();
+struct CompilerContext create_compiler_context(enum CurrentStage stage);
 void modify_compiler_context_stage(struct CompilerContext *context, enum CurrentStage stage);
 
 #endif // CONTEXT_H

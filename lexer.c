@@ -16,7 +16,7 @@
 #define DEBUG 1
 
 /*
-TODO:
+TODO(malac0da):
 
 - Add more unit tests for edge cases (unterminated strings, comments, etc.).
 

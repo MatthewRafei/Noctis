@@ -1,10 +1,10 @@
+#include "diagnostic.h"
+#include "context.h"
+
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdarg.h>
-
-#include "diagnostic.h"
-#include "context.h"
 
 /*
 INFO →
@@ -23,10 +23,10 @@ Usually compilation cannot continue successfully, but you want to recover and ga
 FATAL →
 Something unrecoverable that prevents even further analysis (e.g. "out of memory", "could not open source file"). Compilation must stop immediately.
 */
-// TODO: SAVE as many INFO,WARNINGs, and ERRORS into a list as possible to print all at once when compilation fails or is finished.
-// TODO: Finish dynamic array
-// TODO: Build function that turns enum types to strings or hard code strings? idk what is best yet.
-// TODO: Build function that can print all error messages to stderr
+// TODO(malac0da): SAVE as many INFO,WARNINGs, and ERRORS into a list as possible to print all at once when compilation fails or is finished.
+// TODO(malac0da): Finish dynamic array
+// TODO(malac0da): Build function that turns enum types to strings or hard code strings? idk what is best yet.
+// TODO(malac0da): Build function that can print all error messages to stderr
 
 #define DYNARR_INITIAL_SIZE 16
 
@@ -43,25 +43,37 @@ void report_error(const char *file, const size_t line, const size_t col, const e
     switch (level)
     {
     case INFO:
-        fprintf(stderr, fmt, file, line, col, level);
+        (void)fprintf(stderr, fmt, file, line, col, level);
         break;
     case WARNING:
+        printf("Warning: ");
         push_error(context->message_array, message, context);
         break;
     case ERROR:
         push_error(context->message_array, message, context);
         break;
     case FATAL:
-        fprintf(stderr, fmt, file, line, col, level);
+        (void)fprintf(stderr, fmt, file, line, col, level);
         break;
     default:
-        fprintf(stderr, "You should not see this");
+        (void)fprintf(stderr, "You should not see this");
         break;
     }
 
     context->num_of_errors += 1;
 }
 
+/*
+TODO(malac0da): Implement this struct to hold source location information so we dont have to pass in so many parameters
+
+struct SourceLocation {
+    const char *file;
+    size_t line;
+    size_t col;
+};
+
+create_message((struct SourceLocation){ "main.c", 42, 17 }, ERROR_FATAL, "oops");
+*/
 struct DiagnosticMessage create_message(const char *file, const size_t line, const size_t col, const enum ErrorLevel level, const char *fmt)
 {
     struct DiagnosticMessage message;
@@ -93,6 +105,6 @@ void print_diagnostic_messages(struct DiagnosticMessage* message_arry, size_t nu
 {
     printf("Total Errors: %zu\n", num_of_errors);
     for(size_t i = 0; i < num_of_errors; ++i){
-        fprintf(stderr, "Error: %s:%zu:%zu: %s\n", message_arry[i].file, message_arry[i].line, message_arry[i].col, message_arry[i].fmt);
+        (void)fprintf(stderr, "Error: %s:%zu:%zu: %s\n", message_arry[i].file, message_arry[i].line, message_arry[i].col, message_arry[i].fmt);
     }
 }

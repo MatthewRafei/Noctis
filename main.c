@@ -44,8 +44,7 @@ int main(int argc, char *argv[])
   // All fun and games
   print_ascii_logo();
 
-  struct CompilerContext context = create_compiler_context();
-  modify_compiler_context_stage(&context, MAIN);
+  struct CompilerContext context = create_compiler_context(MAIN);
 
   if (argc < 2) {
     // fprintf(stderr, "Usage: noctis <filepath>\n");
@@ -61,6 +60,8 @@ int main(int argc, char *argv[])
     // Replace with better error handling
     return 1; // Exit gracefully.
   }
+
+  //fprintf_s(stderr, "Failed to read source file: %s\n", fp);
 
   // Lexer
   modify_compiler_context_stage(&context, LEXING);
