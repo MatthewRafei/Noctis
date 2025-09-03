@@ -21,6 +21,7 @@ TODO:
 
 void print_ascii_logo(void) {
     const char *logo[] = {
+        "                                                              ",
         "███▄▄▄▄    ▄██████▄   ▄████████     ███      ▄█     ▄████████",
         "███▀▀▀██▄ ███    ███ ███    ███ ▀█████████▄ ███    ███    ███",
         "███   ███ ███    ███ ███    █▀     ▀███▀▀██ ███▌   ███    █▀",
@@ -40,10 +41,11 @@ void print_ascii_logo(void) {
 
 int main(int argc, char *argv[])
 {
-  
+  // All fun and games
   print_ascii_logo();
 
   struct CompilerContext context = create_compiler_context();
+  modify_compiler_context_stage(&context, MAIN);
 
   if (argc < 2) {
     // fprintf(stderr, "Usage: noctis <filepath>\n");
@@ -61,6 +63,7 @@ int main(int argc, char *argv[])
   }
 
   // Lexer
+  modify_compiler_context_stage(&context, LEXING);
   struct Lexer lexer = lex_file(src, fp, &context, LEXER_OK);
   printf("Lexer Status: %d\n", lexer.status);
   if(lexer.status == LEXER_ERROR){
@@ -70,6 +73,9 @@ int main(int argc, char *argv[])
     free(src);
     return 1; // Exit gracefully.
   }
+
+
+
   lexer_dump(&lexer);
   printf("\nLexer size: %ld\n\n", lexer.size);
 

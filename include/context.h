@@ -4,6 +4,7 @@
 #include <stdlib.h>
 
 enum CurrentStage {
+    MAIN,
     LEXING,
     PARSING,
     SEMANTIC_ANALYSIS,
@@ -20,5 +21,6 @@ struct CompilerContext {
 };
 
 struct CompilerContext create_compiler_context();
+void modify_compiler_context_stage(struct CompilerContext *context, enum CurrentStage stage);
 
 #endif // CONTEXT_H
