@@ -2,6 +2,8 @@
 
 let x: int = 3;
 
+let z: string = "Hello;
+
 (*(**)*)
 
 let y: bool = true;

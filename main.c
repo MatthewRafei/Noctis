@@ -18,8 +18,31 @@ TODO:
 - Implement multi-file support
 */
 
+
+void print_ascii_logo(void) {
+    const char *logo[] = {
+        "███▄▄▄▄    ▄██████▄   ▄████████     ███      ▄█     ▄████████",
+        "███▀▀▀██▄ ███    ███ ███    ███ ▀█████████▄ ███    ███    ███",
+        "███   ███ ███    ███ ███    █▀     ▀███▀▀██ ███▌   ███    █▀",
+        "███   ███ ███    ███ ███            ███   ▀ ███▌   ███        ",
+        "███   ███ ███    ███ ███            ███     ███▌ ▀███████████",
+        "███   ███ ███    ███ ███    █▄      ███     ███           ███",
+        "███   ███ ███    ███ ███    ███     ███     ███     ▄█    ███",
+        " ▀█   █▀   ▀██████▀  ████████▀     ▄████▀   █▀    ▄████████▀",
+        "                                                              "
+    };
+
+    size_t lines = sizeof(logo) / sizeof(logo[0]);
+    for (size_t i = 0; i < lines; i++) {
+        printf("%s\n", logo[i]);
+    }
+}
+
 int main(int argc, char *argv[])
 {
+  
+  print_ascii_logo();
+
   struct CompilerContext context = create_compiler_context();
 
   if (argc < 2) {
@@ -38,12 +61,17 @@ int main(int argc, char *argv[])
   }
 
   // Lexer
-  struct Lexer lexer = lex_file(src, fp, context);
+  struct Lexer lexer = lex_file(src, fp, &context, LEXER_OK);
+  printf("Lexer Status: %d\n", lexer.status);
+  if(lexer.status == LEXER_ERROR){
+    print_diagnostic_messages(context.message_array, context.num_of_errors);
+    lexer_free(&lexer);
+    free_diagnostic_message_dynarray(context.message_array);
+    free(src);
+    return 1; // Exit gracefully.
+  }
   lexer_dump(&lexer);
-  printf("\nWhat is lexer size: %ld\n", lexer.size);
-
-  // Temp diagnostic error messages
-  printf("Warning: %s:%zu:%zu: %s\n", context.message_array[0].file, context.message_array[0].line, context.message_array[0].col, context.message_array[0].fmt);
+  printf("\nLexer size: %ld\n\n", lexer.size);
 
   lexer_free(&lexer);
   free_diagnostic_message_dynarray(context.message_array);

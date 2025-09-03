@@ -219,7 +219,7 @@ int not_quote(int c)
   return c != '"' && c != '\'';
 }
 
-struct Lexer lex_file(char *src, const char *fp, struct CompilerContext context)
+struct Lexer lex_file(char *src, const char *fp, struct CompilerContext *context, enum Lexer_Status status)
 {
   struct S_Umap sym_keyword_tbl = init_sym_keyword_tbl();
 
@@ -227,6 +227,8 @@ struct Lexer lex_file(char *src, const char *fp, struct CompilerContext context)
     .hd = NULL,
     .tl = NULL,
   };
+
+  lexer.status = status;
 
   size_t i = 0, line = 1, col = 1;
   while(src[i] != '\0'){
@@ -258,13 +260,15 @@ struct Lexer lex_file(char *src, const char *fp, struct CompilerContext context)
         c_counter += 1;
 
         if(src[i+counter] == '(' && src[i+counter+1] == '*'){
-          report_error(__FILE__, line, col, WARNING, "Nested multi-line comments are not supported.\n", &context);
+          report_error(__FILE__, line, col, ERROR, "Nested multi-line comments are not supported.\n", context);
+          lexer.status = LEXER_ERROR;
         }
       }
       // What if string is not Buffer Null-Termination?
       if(!src[i+counter]){
-        printf("unterminated comment at file: \"%s\" on line: %ld col: %ld\n", fp, line, col);
-        exit(1);
+        report_error(__FILE__, line, col, FATAL, "Unterminated multi-line comment.\n", context);
+        lexer.status = LEXER_ERROR;
+        return lexer;
       }
 
       // 2 because we need to skip '*)'
@@ -321,8 +325,10 @@ struct Lexer lex_file(char *src, const char *fp, struct CompilerContext context)
       // You reference closing_quote in the string literal parsing, but it's not defined.
       // You should ensure that you compare against ch, which holds the opening quote:
       if (src[i + len] != ch) {
-        printf("Unterminated string at file: \"%s\" on line: %ld col: %ld\n", fp, line, col);
-        exit(1);
+        //printf("Unterminated string at file: \"%s\" on line: %ld col: %ld\n", fp, line, col);
+        report_error(__FILE__, line, col, FATAL, "Unterminated string literal.\n", context);
+        lexer.status = LEXER_ERROR;
+        return lexer;
       }
 
       struct Token *t = token_alloc(TOKEN_STRING_LIT, src+i, len, fp, line, col);

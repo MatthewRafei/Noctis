@@ -21,8 +21,7 @@ Usually compilation cannot continue successfully, but you want to recover and ga
 → Standard practice: log and continue as long as possible, but prevent emitting an executable/output at the end.
 
 FATAL →
-Something unrecoverable that prevents even further analysis (e.g. "out of memory", "could not open source file").
-❌ Compilation must stop immediately.
+Something unrecoverable that prevents even further analysis (e.g. "out of memory", "could not open source file"). Compilation must stop immediately.
 */
 // TODO: SAVE as many INFO,WARNINGs, and ERRORS into a list as possible to print all at once when compilation fails or is finished.
 // TODO: Finish dynamic array
@@ -50,16 +49,16 @@ void report_error(const char *file, const size_t line, const size_t col, const e
         push_error(context->message_array, message, context);
         break;
     case ERROR:
-        fprintf(stderr, fmt, file, line, col, level);
+        push_error(context->message_array, message, context);
         break;
     case FATAL:
         fprintf(stderr, fmt, file, line, col, level);
         break;
     default:
-        fprintf(stderr, "Error: %s:%zu:%zu: %s\n", file, line, col, fmt);
+        fprintf(stderr, "You should not see this");
         break;
     }
-    
+
     context->num_of_errors += 1;
 }
 
@@ -88,4 +87,12 @@ void push_error(struct DiagnosticMessage* message_array, struct DiagnosticMessag
 void free_diagnostic_message_dynarray(struct DiagnosticMessage* message_array)
 {
     free(message_array);
+}
+
+void print_diagnostic_messages(struct DiagnosticMessage* message_arry, size_t num_of_errors)
+{
+    printf("Total Errors: %zu\n", num_of_errors);
+    for(size_t i = 0; i < num_of_errors; ++i){
+        fprintf(stderr, "Error: %s:%zu:%zu: %s\n", message_arry[i].file, message_arry[i].line, message_arry[i].col, message_arry[i].fmt);
+    }
 }
