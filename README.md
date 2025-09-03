@@ -1,13 +1,14 @@
 # The Noctis Programming Language
-                                                      
- @@@  @@@  @@@@@@   @@@@@@@ @@@@@@@ @@@  @@@@@@
- @@!@!@@@ @@!  @@@ !@@        @@!   @@! !@@    
- @!@@!!@! @!@  !@! !@!        @!!   !!@  !@@!! 
- !!:  !!! !!:  !!! :!!        !!:   !!:     !:!
- ::    :   : :. :   :: :: :    :    :   ::.: : 
-                                               
-                                                      
-                                                              
+```
+███▄▄▄▄    ▄██████▄   ▄████████     ███      ▄█     ▄████████
+███▀▀▀██▄ ███    ███ ███    ███ ▀█████████▄ ███    ███    ███
+███   ███ ███    ███ ███    █▀     ▀███▀▀██ ███▌   ███    █▀
+███   ███ ███    ███ ███            ███   ▀ ███▌   ███        
+███   ███ ███    ███ ███            ███     ███▌ ▀███████████
+███   ███ ███    ███ ███    █▄      ███     ███           ███
+███   ███ ███    ███ ███    ███     ███     ███     ▄█    ███
+ ▀█   █▀   ▀██████▀  ████████▀     ▄████▀   █▀    ▄████████▀
+```                                                              
 ## Overview
 **Noctis** is a simple, safe, and explicit programming language inspired by C’s minimalism and Rust’s memory safety. It is designed to be beginner-friendly while enforcing strong guarantees about memory usage and program correctness.  
 
