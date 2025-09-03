@@ -76,7 +76,7 @@ struct DiagnosticMessage create_message(const char *file, const size_t line, con
 
 struct DiagnosticMessage* create_diagnostic_message_dynarray(void)
 {
-    return (struct DiagnosticMessage*)malloc(DYNARR_INITIAL_SIZE * sizeof(struct DiagnosticMessage*));
+    return (struct DiagnosticMessage*)malloc(DYNARR_INITIAL_SIZE * sizeof(struct DiagnosticMessage));
 }
 
 void push_error(struct DiagnosticMessage* message_array, struct DiagnosticMessage message, struct CompilerContext *context)
