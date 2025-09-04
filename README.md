@@ -1,9 +1,19 @@
 # The Noctis Programming Language
-
+```
+███▄▄▄▄    ▄██████▄   ▄████████     ███      ▄█     ▄████████
+███▀▀▀██▄ ███    ███ ███    ███ ▀█████████▄ ███    ███    ███
+███   ███ ███    ███ ███    █▀     ▀███▀▀██ ███▌   ███    █▀
+███   ███ ███    ███ ███            ███   ▀ ███▌   ███        
+███   ███ ███    ███ ███            ███     ███▌ ▀███████████
+███   ███ ███    ███ ███    █▄      ███     ███           ███
+███   ███ ███    ███ ███    ███     ███     ███     ▄█    ███
+ ▀█   █▀   ▀██████▀  ████████▀     ▄████▀   █▀    ▄████████▀
+```                                                              
 ## Overview
 **Noctis** is a simple, safe, and explicit programming language inspired by C’s minimalism and Rust’s memory safety. It is designed to be beginner-friendly while enforcing strong guarantees about memory usage and program correctness.  
 
 Noctis emphasizes **clarity, ownership, and explicitness**, avoiding hidden complexity like type inference or implicit conversions. Its syntax is intentionally minimal, making it approachable for small projects, systems-level experiments, and learning the foundations of safe programming.
+
 
 ## Roadmap
 - [X] Language Specification
@@ -22,7 +32,6 @@ Noctis emphasizes **clarity, ownership, and explicitness**, avoiding hidden comp
 - **Safety**: Rust-inspired ownership and borrowing rules prevent memory errors and race conditions.
 - **Explicitness**: Types, mutability, and ownership must be declared, eliminating ambiguity.
 - **Ease of Use**: A small, consistent feature set that is easy to learn and teach.
-
 
 
 ## Language Features
