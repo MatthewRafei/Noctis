@@ -8,7 +8,7 @@
 #include <string.h>
 
 /*
-TODO:
+TODO(malac0da):
 - Add unit tests for edge cases (NULL, empty strings, etc.).
 */
 

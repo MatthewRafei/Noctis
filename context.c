@@ -1,8 +1,7 @@
-#include <stdlib.h>
-
 #include "context.h"
 #include "diagnostic.h"
 
+#include <stdlib.h>
 
 struct CompilerContext create_compiler_context(enum CurrentStage stage)
 {

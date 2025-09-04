@@ -2,8 +2,11 @@
 
 let x: int = 3;
 
-let z: string = "Hello;
 
 (*(**)*)
+
+(*(**)*)
+
+let z: string = "Unterm;
 
 let y: bool = true;

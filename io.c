@@ -33,7 +33,7 @@ char *file_to_str(const char *fp)
     return NULL;
   }
 
-  rewind(file);
+  (void)fseek(file, 0, SEEK_SET);
 
   // No need to cast char* as malloc's return type
   // is already void *

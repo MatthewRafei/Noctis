@@ -19,4 +19,5 @@ struct Lexer lex_file(char *src, const char *fp, struct CompilerContext *context
 void lexer_dump(const struct Lexer *l);
 void lexer_free(struct Lexer *l);
 
+
 #endif // LEXER_H

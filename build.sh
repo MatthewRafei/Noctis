@@ -1,10 +1,13 @@
 #!/bin/bash
 
+# This script is a “do-your-best” guardrail.
+
 # Dependencies: gcc, clang-tidy (optional), cppcheck (optional)
 # Gnu extensions are currently being used
 
-# TODO : Learn how to implement unit tests and fuzzers into the build process
+# TODO(malac0da): Learn how to implement unit tests and fuzzers into the build process
 
+# -- Flags --
 set -xe
 
 MODE=${1:-DEBUG}
@@ -30,21 +33,20 @@ fi
 $CC $INCLUDE $CFLAGS -o $OUT $SRC
 
 # --- Static analysis section ---
-
-# Run clang-tidy (LLVM)
-if command -v clang-tidy &> /dev/null; then
-    echo "Running clang-tidy..."
-    clang-tidy $SRC -- -std=gnu17 $INCLUDE
-fi
-
-# Run cppcheck
+# Run cppcheck if installed
 if command -v cppcheck &> /dev/null; then
     echo "Running cppcheck..."
     cppcheck \
         --enable=warning,style,performance,portability \
-        --std=c11 --language=c --force \
+        --check-level=exhaustive \
+        --inconclusive \
+        --std=gnu17 --language=c --force \
         -Iinclude \
-        --suppress=missingIncludeSystem \
-        --quiet \
         $SRC
 fi
+
+# -- Formatting --
+#if command -v clang-format &> /dev/null; then
+#    echo "Checking formatting..."
+#    clang-format --dry-run --Werror *.c include/*.h
+#fi

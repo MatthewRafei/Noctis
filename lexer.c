@@ -13,10 +13,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-
-
-#define DEBUG 1
-
 /*
 TODO(malac0da):
 
@@ -65,7 +61,7 @@ static struct S_Umap init_sym_keyword_tbl(void) {
     "~=", "==",          // TOKEN_NE, TOKEN_EQ
     "=",  "!=",          // TOKEN_ASSIGN, TOKEN_NOTEQ
     ">>", "<<",          // TOKEN_GTGT, TOKEN_LTLT
-    "->",                // TOKEN_ARline
+    "->",                // TOKEN_ARROW
   };
 
   for (size_t i = 0; i < (sizeof(syms) / sizeof(*syms)); ++i) {
@@ -75,7 +71,6 @@ static struct S_Umap init_sym_keyword_tbl(void) {
 
   // Keywords
   char *kws[] = KEYWORD_ASCPL;
-
   
   // If this fails its probably because you removed something in either keywords.h, token.h, or token.c
   // And did not make that change across all those three files
@@ -93,28 +88,25 @@ static struct S_Umap init_sym_keyword_tbl(void) {
     s_umap_insert(&tbl, kws[i], (void*)&token);
   }
 
-  // DEBUG PRINT
-  if(DEBUG){
-    for (size_t i = 0; i < (sizeof(syms)/sizeof(*syms)); i++) {
-    printf("Symbol: %s -> Token: %d\n",
-      syms[i],
-      *(enum Token_Type *)s_umap_get(&tbl, syms[i]));
-    }
-    printf("\n");
-    printf("There are %zu symbols in the language", (sizeof(syms)/sizeof(*syms)));
-    printf("\n");
-    printf("\n");
 
-    for (size_t i = 0; i < sizeof(kws)/sizeof(*kws); i++) {
-      printf("Keyword: %s -> Token: %d\n",
-      kws[i],
-      *(enum Token_Type *)s_umap_get(&tbl, kws[i]));
-    }
-    printf("\n");
-    printf("There are %zu keywords in the language", sizeof(kws)/sizeof(*kws));
-    printf("\n");
+  for (size_t i = 0; i < (sizeof(syms)/sizeof(*syms)); i++) {
+  printf("Symbol: %s -> Token: %d\n",
+    syms[i],
+    *(enum Token_Type *)s_umap_get(&tbl, syms[i]));
   }
-  // END DEBUG PRINT
+  printf("\n");
+  printf("There are %zu symbols in the language", (sizeof(syms)/sizeof(*syms)));
+  printf("\n");
+  printf("\n");
+
+  for (size_t i = 0; i < sizeof(kws)/sizeof(*kws); i++) {
+    printf("Keyword: %s -> Token: %d\n",
+    kws[i],
+    *(enum Token_Type *)s_umap_get(&tbl, kws[i]));
+  }
+  printf("\n");
+  printf("There are %zu keywords in the language", sizeof(kws)/sizeof(*kws));
+  printf("\n");
 
   return tbl;
 }
@@ -128,7 +120,6 @@ static void lexer_append(struct Lexer *l, struct Token *t)
     l->tl->next = t;
     l->tl = l->tl->next;
   }
-  // We should be checking to see how big the lexer is lol
   l->size += 1;
 }
 
@@ -187,7 +178,7 @@ int is_identifier(int c)
 
 enum Token_Type *determine_symbol(const char *s,
 				  size_t op_len,
-				  struct S_Umap *sym_keyword_tbl,
+				  const struct S_Umap *sym_keyword_tbl,
 				  size_t *actual_len)
 {
   *actual_len = 0;
@@ -263,14 +254,12 @@ struct Lexer lex_file(char *src, const char *fp, struct CompilerContext *context
 
         if(src[i+counter] == '(' && src[i+counter+1] == '*'){
           report_error(__FILE__, line, col, ERROR, "Nested multi-line comments are not supported.\n", context);
-          lexer.status = LEXER_ERROR;
         }
       }
       // What if string is not Buffer Null-Termination?
       if(!src[i+counter]){
-        report_error(__FILE__, line, col, FATAL, "Unterminated multi-line comment.\n", context);
+        report_error(__FILE__, line, col, WARNING, "Unterminated multi-line comment.\n", context);
         lexer.status = LEXER_ERROR;
-        return lexer;
       }
 
       // 2 because we need to skip '*)'
@@ -299,7 +288,7 @@ struct Lexer lex_file(char *src, const char *fp, struct CompilerContext *context
       memcpy(substring, src + i, len);
       substring[len] = '\0';
 
-      enum Token_Type *type = (enum Token_Type *)s_umap_get(&sym_keyword_tbl, substring);
+      const enum Token_Type *type = (enum Token_Type *)s_umap_get(&sym_keyword_tbl, substring);
 
       if (type != NULL) {
         struct Token *t = token_alloc(*type, src+i, len, fp, line, col);
@@ -327,9 +316,9 @@ struct Lexer lex_file(char *src, const char *fp, struct CompilerContext *context
       // You reference closing_quote in the string literal parsing, but it's not defined.
       // You should ensure that you compare against ch, which holds the opening quote:
       if (src[i + len] != ch) {
-        //printf("Unterminated string at file: \"%s\" on line: %ld col: %ld\n", fp, line, col);
         report_error(__FILE__, line, col, FATAL, "Unterminated string literal.\n", context);
         lexer.status = LEXER_ERROR;
+        s_umap_free(&sym_keyword_tbl);
         return lexer;
       }
 
@@ -381,12 +370,11 @@ struct Lexer lex_file(char *src, const char *fp, struct CompilerContext *context
     else {
       size_t op_len = consume_while(src + i, not_sym);
       size_t len = 0;
-      enum Token_Type *type = determine_symbol(src+i, op_len, &sym_keyword_tbl, &len);
+      const enum Token_Type *type = determine_symbol(src+i, op_len, &sym_keyword_tbl, &len);
 
       if (!type) {
         // TODO(malac0da): Replace with proper error handling
-        //err_wargs("invalid type at: %s\n on line: %ld col: %ld", src + i, line, col);
-        printf("Invalid type at: %s\n on line: %ld col: %ld\n", src + i, line, col);
+        printf("Invalid type at: %s\n on line: %zu col: %zu\n", src + i, line, col);
         lexer.status = LEXER_ERROR;
         return lexer;
       }

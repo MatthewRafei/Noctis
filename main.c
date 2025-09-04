@@ -1,15 +1,13 @@
-#include "lexer.h"
 #include "context.h"
 #include "diagnostic.h"
 #include "io.h"
+#include "lexer.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 
-// dependency: libubsan
-
 /*
-TODO:
+TODO(malac0da):
 - Refactor error handling for consistency (prefer returning error codes or using EXIT_FAILURE).
 - Use fprintf(stderr, ...) for error output.
 
@@ -18,7 +16,8 @@ TODO:
 - Implement multi-file support
 */
 
-void print_ascii_logo(void) {
+void print_ascii_logo(void)
+{
     const char *logo[] = {
         "                                                              ",
         "███▄▄▄▄    ▄██████▄   ▄████████     ███      ▄█     ▄████████",
@@ -38,7 +37,7 @@ void print_ascii_logo(void) {
     }
 }
 
-int main(int argc, char *argv[])
+int main(int argc, const char *argv[])
 {
   // All fun and games
   print_ascii_logo();
@@ -47,6 +46,9 @@ int main(int argc, char *argv[])
 
   if (argc < 2) {
     report_error(__FILE__, context.line, context.col, FATAL, "Usage: noctis <filepath>", &context);
+    print_diagnostic_messages(context.message_array, context.num_of_errors);
+    free_diagnostic_message_dynarray(context.message_array);
+    return EXIT_FAILURE;
   }
 
   const char *fp = argv[1];
@@ -55,7 +57,7 @@ int main(int argc, char *argv[])
   // check source before calling lex_file
   if(!src){
     // Replace with better error handling
-    return 1; // Exit gracefully.
+    return EXIT_FAILURE;
   }
 
   // Lexer
@@ -67,14 +69,18 @@ int main(int argc, char *argv[])
     lexer_free(&lexer);
     free_diagnostic_message_dynarray(context.message_array);
     free(src);
-    return 1; // Exit gracefully.
+    return EXIT_FAILURE;
+  }
+  else if (context.num_of_errors > 0){
+    print_diagnostic_messages(context.message_array, context.num_of_errors);
+  }
+  else{
+    printf("\nLexer size: %zu\n\n", lexer.size);
+    lexer_dump(&lexer);
+    free_diagnostic_message_dynarray(context.message_array);
+    free(src);
   }
 
-  lexer_dump(&lexer);
-  printf("\nLexer size: %ld\n\n", lexer.size);
 
-  lexer_free(&lexer);
-  free_diagnostic_message_dynarray(context.message_array);
-  free(src);
-  return 0;
+  return EXIT_SUCCESS;
 }

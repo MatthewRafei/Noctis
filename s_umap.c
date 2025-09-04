@@ -46,8 +46,8 @@ struct S_Umap s_umap_create(s_umap_hash hash, size_t nodev_stride)
   return map;
 }
 
-struct S_Umap_Node *s_umap_node_create(char *key,
-                                         void *value,
+struct S_Umap_Node *s_umap_node_create(const char *key,
+                                         const void *value,
                                          size_t nodev_stride)
 {
   struct S_Umap_Node *node = (struct S_Umap_Node *)s_malloc(sizeof(struct S_Umap_Node));
@@ -89,7 +89,7 @@ static void node_free(struct S_Umap_Node *n)
   free(n);
 }
 
-void s_umap_insert(struct S_Umap *map, char *key, void *value)
+void s_umap_insert(struct S_Umap *map, const char *key, const void *value)
 {
   struct S_Umap_Node *node = s_umap_node_create(key, value, map->nodev_stride);
 

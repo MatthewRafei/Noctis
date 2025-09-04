@@ -1,1 +1,8 @@
 noctis
+.vscode/
+*.plist
+*.o
+*.dSYM
+*.so
+*.a
+*.out

@@ -46,14 +46,16 @@ void report_error(const char *file, const size_t line, const size_t col, const e
         (void)fprintf(stderr, fmt, file, line, col, level);
         break;
     case WARNING:
-        printf("Warning: ");
+        printf("WARNING: ");
         push_error(context->message_array, message, context);
         break;
     case ERROR:
         push_error(context->message_array, message, context);
         break;
     case FATAL:
-        (void)fprintf(stderr, fmt, file, line, col, level);
+        printf("FATAL:");
+        //(void)fprintf(stderr, fmt, file, line, col, level);
+        push_error(context->message_array, message, context);
         break;
     default:
         (void)fprintf(stderr, "You should not see this");
@@ -91,7 +93,7 @@ struct DiagnosticMessage* create_diagnostic_message_dynarray(void)
     return (struct DiagnosticMessage*)malloc(DYNARR_INITIAL_SIZE * sizeof(struct DiagnosticMessage));
 }
 
-void push_error(struct DiagnosticMessage* message_array, struct DiagnosticMessage message, struct CompilerContext *context)
+void push_error(struct DiagnosticMessage* message_array, struct DiagnosticMessage message, const struct CompilerContext *context)
 {
     message_array[context->num_of_errors] = message;
 }
@@ -101,10 +103,10 @@ void free_diagnostic_message_dynarray(struct DiagnosticMessage* message_array)
     free(message_array);
 }
 
-void print_diagnostic_messages(struct DiagnosticMessage* message_arry, size_t num_of_errors)
+void print_diagnostic_messages(const struct DiagnosticMessage* message_array, const size_t num_of_errors)
 {
     printf("Total Errors: %zu\n", num_of_errors);
     for(size_t i = 0; i < num_of_errors; ++i){
-        (void)fprintf(stderr, "Error: %s:%zu:%zu: %s\n", message_arry[i].file, message_arry[i].line, message_arry[i].col, message_arry[i].fmt);
+        (void)fprintf(stderr, "Error: %s:%zu:%zu: %s\n", message_array[i].file, message_array[i].line, message_array[i].col, message_array[i].fmt);
     }
 }
