@@ -23,10 +23,10 @@ Usually compilation cannot continue successfully, but you want to recover and ga
 FATAL →
 Something unrecoverable that prevents even further analysis (e.g. "out of memory", "could not open source file"). Compilation must stop immediately.
 */
+
 // TODO(malac0da): SAVE as many INFO,WARNINGs, and ERRORS into a list as possible to print all at once when compilation fails or is finished.
 // TODO(malac0da): Finish dynamic array
 // TODO(malac0da): Build function that turns enum types to strings or hard code strings? idk what is best yet.
-// TODO(malac0da): Build function that can print all error messages to stderr
 
 #define DYNARR_INITIAL_SIZE 16
 
@@ -50,15 +50,16 @@ void report_error(const char *file, const size_t line, const size_t col, const e
         push_error(context->message_array, message, context);
         break;
     case ERROR:
+        printf("ERROR: ");
         push_error(context->message_array, message, context);
         break;
     case FATAL:
-        printf("FATAL:");
-        //(void)fprintf(stderr, fmt, file, line, col, level);
+        printf("FATAL: ");
         push_error(context->message_array, message, context);
         break;
     default:
-        (void)fprintf(stderr, "You should not see this");
+        (void)fprintf(stderr, "You found a bug in the compiler, please report it!\n");
+        (void)fprintf(stderr, "Unknown error level: %d\n", level);
         break;
     }
 
@@ -66,7 +67,7 @@ void report_error(const char *file, const size_t line, const size_t col, const e
 }
 
 /*
-TODO(malac0da): Implement this struct to hold source location information so we dont have to pass in so many parameters
+TODO(malac0da): Implement this struct to hold source location information so we dont have to pass in so many arguments
 
 struct SourceLocation {
     const char *file;

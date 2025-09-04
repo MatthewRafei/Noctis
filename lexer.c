@@ -43,6 +43,11 @@ TODO(malac0da):
 */
 
 static struct S_Umap init_sym_keyword_tbl(void) {
+
+  if(fnv1a("ds") == 0){
+    report_error(__FILE__, 0, 0, FATAL, "FNV-1a hash function is not initialized.\n", NULL);
+  }
+
   struct S_Umap tbl = s_umap_create(fnv1a, sizeof(enum Token_Type));
 
   char *syms[] = {
@@ -88,25 +93,21 @@ static struct S_Umap init_sym_keyword_tbl(void) {
     s_umap_insert(&tbl, kws[i], (void*)&token);
   }
 
-
+  printf("\nThere are %zu symbols in the language\n", (sizeof(syms)/sizeof(*syms)));
   for (size_t i = 0; i < (sizeof(syms)/sizeof(*syms)); i++) {
-  printf("Symbol: %s -> Token: %d\n",
+    printf("Symbol: %s -> Token: %d\n",
     syms[i],
     *(enum Token_Type *)s_umap_get(&tbl, syms[i]));
   }
-  printf("\n");
-  printf("There are %zu symbols in the language", (sizeof(syms)/sizeof(*syms)));
-  printf("\n");
+
   printf("\n");
 
+  printf("\nThere are %zu keywords in the language\n", sizeof(kws)/sizeof(*kws));
   for (size_t i = 0; i < sizeof(kws)/sizeof(*kws); i++) {
     printf("Keyword: %s -> Token: %d\n",
     kws[i],
     *(enum Token_Type *)s_umap_get(&tbl, kws[i]));
   }
-  printf("\n");
-  printf("There are %zu keywords in the language", sizeof(kws)/sizeof(*kws));
-  printf("\n");
 
   return tbl;
 }
@@ -258,7 +259,7 @@ struct Lexer lex_file(char *src, const char *fp, struct CompilerContext *context
       }
       // What if string is not Buffer Null-Termination?
       if(!src[i+counter]){
-        report_error(__FILE__, line, col, WARNING, "Unterminated multi-line comment.\n", context);
+        report_error(__FILE__, line, col, FATAL, "Unterminated multi-line comment.\n", context);
         lexer.status = LEXER_ERROR;
       }
 

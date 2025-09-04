@@ -18,7 +18,6 @@ TODO(malac0da):
 uint32_t fnv1a(const char* key)
 {
   if(!key){ // TODO(malac0da): Report error for null key
-    //report_error("Error key is null");
     return 0;
   }
 

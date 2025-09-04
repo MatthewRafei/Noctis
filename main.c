@@ -56,7 +56,10 @@ int main(int argc, const char *argv[])
 
   // check source before calling lex_file
   if(!src){
-    // Replace with better error handling
+    report_error(__FILE__, context.line, context.col, FATAL, "Failed to read source file.\n", &context);
+    print_diagnostic_messages(context.message_array, context.num_of_errors);
+    free_diagnostic_message_dynarray(context.message_array);
+    free(src);
     return EXIT_FAILURE;
   }
 
@@ -64,23 +67,27 @@ int main(int argc, const char *argv[])
   modify_compiler_context_stage(&context, LEXING);
   struct Lexer lexer = lex_file(src, fp, &context, LEXER_OK);
   printf("Lexer Status: %d\n", lexer.status);
-  if(lexer.status == LEXER_ERROR){
+
+  if(lexer.status == LEXER_ERROR){ // ERROR and FATAL cause program to exit with failure
     print_diagnostic_messages(context.message_array, context.num_of_errors);
     lexer_free(&lexer);
     free_diagnostic_message_dynarray(context.message_array);
     free(src);
     return EXIT_FAILURE;
   }
-  else if (context.num_of_errors > 0){
+  else if (context.num_of_errors > 0){ // Non-fatal errors, continue but print errors
     print_diagnostic_messages(context.message_array, context.num_of_errors);
-  }
-  else{
-    printf("\nLexer size: %zu\n\n", lexer.size);
-    lexer_dump(&lexer);
+    lexer_free(&lexer);
     free_diagnostic_message_dynarray(context.message_array);
     free(src);
   }
-
+  else{ // no errors, continue as normal
+    printf("\nLexer size: %zu\n\n", lexer.size);
+    lexer_dump(&lexer);
+    lexer_free(&lexer);
+    free_diagnostic_message_dynarray(context.message_array);
+    free(src);
+  }
 
   return EXIT_SUCCESS;
 }
