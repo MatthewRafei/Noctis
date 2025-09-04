@@ -7,20 +7,20 @@ char *file_to_str(const char *fp)
 {
   FILE *file = fopen(fp, "rb");
 
-  if (!file) {
+  if (!file) { 
     perror("Failed to open file");
     exit(1);
   }
 
   if (fseek(file, 0, SEEK_END) != 0){
     perror("Failed to seek file");
-    fclose(file);
+    (void)fclose(file);
     return NULL;
   }
 
   if (ftell(file) < 0) {
     perror("Failed to determine file length");
-    fclose(file);
+    (void)fclose(file);
     return NULL;
   }
 
@@ -29,7 +29,7 @@ char *file_to_str(const char *fp)
   // Some file-systems might return -1
   if(length == (size_t)-1){
     printf("Failed to determine file length\n");
-    fclose(file);
+    (void)fclose(file);
     return NULL;
   }
 
@@ -40,20 +40,20 @@ char *file_to_str(const char *fp)
   char *buffer = malloc(length + 1);
   if (!buffer) {
     perror("Failed to allocate memory");
-    fclose(file);
+    (void)fclose(file);
     return NULL;
   }
 
   //Free buffer if fread fails
   size_t read_size = fread(buffer, 1, length, file);
-  if(read_size != (size_t)length){
+  if(read_size != length){
     perror("Failed to read file");
     free(buffer);
-    fclose(file);
+    (void)fclose(file);
     return NULL;
   }
 
   buffer[length] = '\0';
-  fclose(file);
+  (void)fclose(file);
   return buffer;
 }

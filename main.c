@@ -1,10 +1,10 @@
-#include <stdio.h>
-#include <stdlib.h>
-
 #include "lexer.h"
 #include "context.h"
 #include "diagnostic.h"
 #include "io.h"
+
+#include <stdio.h>
+#include <stdlib.h>
 
 // dependency: libubsan
 
@@ -17,7 +17,6 @@ TODO:
 
 - Implement multi-file support
 */
-
 
 void print_ascii_logo(void) {
     const char *logo[] = {
@@ -47,9 +46,7 @@ int main(int argc, char *argv[])
   struct CompilerContext context = create_compiler_context(MAIN);
 
   if (argc < 2) {
-    // fprintf(stderr, "Usage: noctis <filepath>\n");
-    // help();
-    exit(1);
+    report_error(__FILE__, context.line, context.col, FATAL, "Usage: noctis <filepath>", &context);
   }
 
   const char *fp = argv[1];
@@ -60,8 +57,6 @@ int main(int argc, char *argv[])
     // Replace with better error handling
     return 1; // Exit gracefully.
   }
-
-  //fprintf_s(stderr, "Failed to read source file: %s\n", fp);
 
   // Lexer
   modify_compiler_context_stage(&context, LEXING);
@@ -74,8 +69,6 @@ int main(int argc, char *argv[])
     free(src);
     return 1; // Exit gracefully.
   }
-
-
 
   lexer_dump(&lexer);
   printf("\nLexer size: %ld\n\n", lexer.size);

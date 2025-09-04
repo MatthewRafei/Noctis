@@ -1,17 +1,19 @@
+#include "context.h"
+#include "diagnostic.h"
+#include "ds/s_umap.h"
+#include "fnv-1a.h"
+#include "keywords.h"
+#include "lexer.h"
+#include "token.h"
+#include "utils.h"
+
 #include <assert.h>
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include "lexer.h"
-#include "keywords.h"
-#include "ds/s-umap.h"
-#include "token.h"
-#include "utils.h"
-#include "fnv-1a.h"
-#include "diagnostic.h"
-#include "context.h"
+
 
 #define DEBUG 1
 
@@ -77,7 +79,7 @@ static struct S_Umap init_sym_keyword_tbl(void) {
   
   // If this fails its probably because you removed something in either keywords.h, token.h, or token.c
   // And did not make that change across all those three files
-  assert(sizeof(kws)/sizeof(*kws) == (TOKEN_KEYWORD_LEN - TOKEN_SYMBOL_LEN) - 1);
+  static_assert(sizeof(kws)/sizeof(*kws) == (TOKEN_KEYWORD_LEN - TOKEN_SYMBOL_LEN) - 1, "Keyword table size mismatch");
 
   for (size_t i = 0; i < sizeof(kws)/sizeof(*kws); ++i) {
     /*
@@ -87,7 +89,7 @@ static struct S_Umap init_sym_keyword_tbl(void) {
       The addition of `+1` and the `i + (int)TOKEN_SYMBOL_LEN` ensures that we're 
       correctly indexing into the Token_Type enum for the corresponding keyword.
     */
-    enum Token_Type token = (enum Token_Type)(i + (int)TOKEN_SYMBOL_LEN) + 1;
+    enum Token_Type token = (enum Token_Type)(i + TOKEN_SYMBOL_LEN) + 1;
     s_umap_insert(&tbl, kws[i], (void*)&token);
   }
 
@@ -313,8 +315,8 @@ struct Lexer lex_file(char *src, const char *fp, struct CompilerContext *context
       free(substring);
     }
 
-    // TODO: Make it so that character literals are their own thing.
-    // TODO: Escape sequences
+    // TODO(malac0da): Make it so that character literals are their own thing.
+    // TODO(malac0da): Escape sequences
     else if (ch == '"' || ch == '\'') {
 
       i += 1, col += 1; // " or '
@@ -382,7 +384,11 @@ struct Lexer lex_file(char *src, const char *fp, struct CompilerContext *context
       enum Token_Type *type = determine_symbol(src+i, op_len, &sym_keyword_tbl, &len);
 
       if (!type) {
-        err_wargs("invalid type at: %s\n on line: %ld col: %ld", src + i, line, col);
+        // TODO(malac0da): Replace with proper error handling
+        //err_wargs("invalid type at: %s\n on line: %ld col: %ld", src + i, line, col);
+        printf("Invalid type at: %s\n on line: %ld col: %ld\n", src + i, line, col);
+        lexer.status = LEXER_ERROR;
+        return lexer;
       }
 
       struct Token *t = token_alloc(*type, src + i, len, fp, line, col);
@@ -402,7 +408,9 @@ void lexer_free(struct Lexer *l)
   struct Token *node = l->hd;
   while(node){
     struct Token *n = node->next;
-    if(node->lexeme) free(node->lexeme);
+    if(node->lexeme){
+      free(node->lexeme);
+    }
     free(node);
     node = n;
   }

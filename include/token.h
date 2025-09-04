@@ -1,8 +1,8 @@
 #ifndef TOKEN_H
 #define TOKEN_H
 
-#include <stdint.h>
 #include <stddef.h>
+#include <stdint.h>
 
 enum Token_Type {
   // Single-character tokens

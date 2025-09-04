@@ -11,8 +11,11 @@ struct CompilerContext create_compiler_context(enum CurrentStage stage)
     context.message_array = inital_diagnostic_system();
     context.num_of_errors = 0;
 
-    return context;
+    // Maybe these need to be variadic or something
+    context.line = 0;
+    context.col = 0;
 
+    return context;
 }
 
 void modify_compiler_context_stage(struct CompilerContext *context, enum CurrentStage stage)

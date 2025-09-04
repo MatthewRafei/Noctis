@@ -1,13 +1,13 @@
-#ifndef S_UMAP_H
-#define S_UMAP_H
+#ifndef DS_S_UMAP_H
+#define DS_S_UMAP_H
 
 #include <stddef.h>
 
 typedef unsigned long (*s_umap_hash)(const char *);
 
 // Basically linked list node
-struct _S_Umap_Node {
-  struct _S_Umap_Node *next;
+struct S_Umap_Node {
+  struct S_Umap_Node *next;
   char *key; // Because collisions
   void *value;
 };
@@ -16,7 +16,7 @@ struct _S_Umap_Node {
 struct S_Umap {
   struct {
     // Array of nodes
-    struct _S_Umap_Node **nodes;
+    struct S_Umap_Node **nodes;
     size_t len, cap;
   } tbl;
 
@@ -27,7 +27,7 @@ struct S_Umap {
 };
 
 struct S_Umap s_umap_create(s_umap_hash hash, size_t nodev_stride);
-struct _S_Umap_Node* _s_umap_node_create(char* key, void* value, size_t nodev_stride);
+struct S_Umap_Node* s_umap_node_create(char* key, void* value, size_t nodev_stride);
 void s_umap_insert(struct S_Umap *map, char *key, void *value);
 void s_umap_free(struct S_Umap *map);
 void s_umap_print(struct S_Umap *map, void (*vp)(const void *));
@@ -36,4 +36,4 @@ int s_umap_contains(const struct S_Umap *map, const char *key);
 
 
 
-#endif // S_UMAP_H
+#endif // DS_S_UMAP_H

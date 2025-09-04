@@ -1,8 +1,8 @@
 #ifndef LEXER_H
 #define LEXER_H
 
-#include "token.h"
 #include "context.h"
+#include "token.h"
 
 enum Lexer_Status {
   LEXER_OK,

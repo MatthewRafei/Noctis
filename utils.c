@@ -1,9 +1,10 @@
 // Global utility functions 
-#include <stdlib.h>
-#include <stdio.h>
-
 #include "utils.h"
 
+#include <stdio.h>
+#include <stdlib.h>
+
+// TODO(malac0da): better error handling
 void *s_malloc(size_t bytes)
 {
     void *p = malloc(bytes);

@@ -1,13 +1,13 @@
-#include <stdio.h>
-#include <assert.h>
-#include <stdlib.h>
-#include <string.h>
-
 #include "token.h"
 #include "utils.h"
 
+#include <assert.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
 /*
-TODO:
+TODO(malac0da):
 - Refactor enum_to_str using a mapping array for better scalability and maintainability.
 - Add error checks for memory allocation in token_alloc (handle strndup and s_malloc failures).
 - Use const char * for lexeme and fp parameters in token_alloc for clarity.
