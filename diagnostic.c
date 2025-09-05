@@ -30,37 +30,37 @@ Something unrecoverable that prevents even further analysis (e.g. "out of memory
 
 #define DYNARR_INITIAL_SIZE 16
 
-struct DiagnosticMessage* inital_diagnostic_system(void)
+struct DiagnosticMessage *inital_diagnostic_system(void)
 {
-    struct DiagnosticMessage* message_array = create_diagnostic_message_dynarray();
+    struct DiagnosticMessage *message_array = create_diagnostic_message_dynarray();
     return message_array;
 }
 
-void report_error(const char *file, const size_t line, const size_t col, const enum ErrorLevel level, const char *fmt, struct CompilerContext *context)
+void report_error(const char *file, const size_t line, const size_t col,
+                  const enum ErrorLevel level, const char *fmt, struct CompilerContext *context)
 {
     struct DiagnosticMessage message = create_message(file, line, col, level, fmt);
 
-    switch (level)
-    {
-    case INFO:
-        (void)fprintf(stderr, fmt, file, line, col, level);
-        break;
-    case WARNING:
-        printf("WARNING: ");
-        push_error(context->message_array, message, context);
-        break;
-    case ERROR:
-        printf("ERROR: ");
-        push_error(context->message_array, message, context);
-        break;
-    case FATAL:
-        printf("FATAL: ");
-        push_error(context->message_array, message, context);
-        break;
-    default:
-        (void)fprintf(stderr, "You found a bug in the compiler, please report it!\n");
-        (void)fprintf(stderr, "Unknown error level: %d\n", level);
-        break;
+    switch (level) {
+        case INFO:
+            (void) fprintf(stderr, fmt, file, line, col, level);
+            break;
+        case WARNING:
+            printf("WARNING: ");
+            push_error(context->message_array, message, context);
+            break;
+        case ERROR:
+            printf("ERROR: ");
+            push_error(context->message_array, message, context);
+            break;
+        case FATAL:
+            printf("FATAL: ");
+            push_error(context->message_array, message, context);
+            break;
+        default:
+            (void) fprintf(stderr, "You found a bug in the compiler, please report it!\n");
+            (void) fprintf(stderr, "Unknown error level: %d\n", level);
+            break;
     }
 
     context->num_of_errors += 1;
@@ -77,7 +77,8 @@ struct SourceLocation {
 
 create_message((struct SourceLocation){ "main.c", 42, 17 }, ERROR_FATAL, "oops");
 */
-struct DiagnosticMessage create_message(const char *file, const size_t line, const size_t col, const enum ErrorLevel level, const char *fmt)
+struct DiagnosticMessage create_message(const char *file, const size_t line, const size_t col,
+                                        const enum ErrorLevel level, const char *fmt)
 {
     struct DiagnosticMessage message;
     message.file = file;
@@ -89,25 +90,29 @@ struct DiagnosticMessage create_message(const char *file, const size_t line, con
     return message;
 }
 
-struct DiagnosticMessage* create_diagnostic_message_dynarray(void)
+struct DiagnosticMessage *create_diagnostic_message_dynarray(void)
 {
-    return (struct DiagnosticMessage*)malloc(DYNARR_INITIAL_SIZE * sizeof(struct DiagnosticMessage));
+    return (struct DiagnosticMessage *) malloc(DYNARR_INITIAL_SIZE *
+                                               sizeof(struct DiagnosticMessage));
 }
 
-void push_error(struct DiagnosticMessage* message_array, struct DiagnosticMessage message, const struct CompilerContext *context)
+void push_error(struct DiagnosticMessage *message_array, struct DiagnosticMessage message,
+                const struct CompilerContext *context)
 {
     message_array[context->num_of_errors] = message;
 }
 
-void free_diagnostic_message_dynarray(struct DiagnosticMessage* message_array)
+void free_diagnostic_message_dynarray(struct DiagnosticMessage *message_array)
 {
     free(message_array);
 }
 
-void print_diagnostic_messages(const struct DiagnosticMessage* message_array, const size_t num_of_errors)
+void print_diagnostic_messages(const struct DiagnosticMessage *message_array,
+                               const size_t num_of_errors)
 {
     printf("Total Errors: %zu\n", num_of_errors);
-    for(size_t i = 0; i < num_of_errors; ++i){
-        (void)fprintf(stderr, "Error: %s:%zu:%zu: %s\n", message_array[i].file, message_array[i].line, message_array[i].col, message_array[i].fmt);
+    for (size_t i = 0; i < num_of_errors; ++i) {
+        (void) fprintf(stderr, "Error: %s:%zu:%zu: %s\n", message_array[i].file,
+                       message_array[i].line, message_array[i].col, message_array[i].fmt);
     }
 }

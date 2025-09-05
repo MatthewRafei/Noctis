@@ -11,4 +11,4 @@
 
 void *s_malloc(size_t bytes);
 
-#endif // UTILS_H
+#endif                          // UTILS_H

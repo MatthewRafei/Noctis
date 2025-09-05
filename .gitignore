@@ -1,5 +1,6 @@
 noctis
 .vscode/
+.indent_backup
 *.plist
 *.o
 *.dSYM

@@ -1,0 +1,10 @@
+-kr         
+-i4         
+-nut        
+-l100       
+-ci4        
+-cli4       
+-bli0       
+-npsl
+-nbad
+-nbackup
