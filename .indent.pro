@@ -7,4 +7,3 @@
 -bli0       
 -npsl
 -nbad
--nbackup
