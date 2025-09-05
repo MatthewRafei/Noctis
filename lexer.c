@@ -44,11 +44,6 @@ TODO(malac0da):
 
 static struct S_Umap init_sym_keyword_tbl(void)
 {
-
-    if (fnv1a("ds") == 0) {
-        report_error(__FILE__, 0, 0, FATAL, "FNV-1a hash function is not initialized.\n", NULL);
-    }
-
     struct S_Umap tbl = s_umap_create(fnv1a, sizeof(enum Token_Type));
 
     char *syms[] = {
@@ -212,6 +207,8 @@ int not_quote(int c)
 struct Lexer lex_file(char *src, const char *fp, struct CompilerContext *context,
                       enum Lexer_Status status)
 {
+    context->source.file = fp;
+
     struct S_Umap sym_keyword_tbl = init_sym_keyword_tbl();
 
     struct Lexer lexer = (struct Lexer) {
@@ -249,14 +246,14 @@ struct Lexer lex_file(char *src, const char *fp, struct CompilerContext *context
                 c_counter += 1;
 
                 if (src[i + counter] == '(' && src[i + counter + 1] == '*') {
-                    report_error(__FILE__, line, col, ERROR,
+                    report_error(context->source.file, line, col, ERROR,
                                  "Nested multi-line comments are not supported.\n", context);
                 }
             }
             // What if string is not Buffer Null-Termination?
             if (!src[i + counter]) {
-                report_error(__FILE__, line, col, FATAL, "Unterminated multi-line comment.\n",
-                             context);
+                report_error(context->source.file, line, col, FATAL,
+                             "Unterminated multi-line comment.\n", context);
                 lexer.status = LEXER_ERROR;
             }
             // 2 because we need to skip '*)'
@@ -310,7 +307,8 @@ struct Lexer lex_file(char *src, const char *fp, struct CompilerContext *context
             // You reference closing_quote in the string literal parsing, but it's not defined.
             // You should ensure that you compare against ch, which holds the opening quote:
             if (src[i + len] != ch) {
-                report_error(__FILE__, line, col, FATAL, "Unterminated string literal.\n", context);
+                report_error(context->source.file, line, col, FATAL,
+                             "Unterminated string literal.\n", context);
                 lexer.status = LEXER_ERROR;
                 s_umap_free(&sym_keyword_tbl);
                 return lexer;

@@ -37,6 +37,14 @@ void print_ascii_logo(void)
     }
 }
 
+void cleanup_and_exit(struct CompilerContext context, char *src, struct Lexer *lexer)
+{
+    print_diagnostic_messages(context.message_array, context.num_of_errors);
+    free_diagnostic_message_dynarray(context.message_array);
+    lexer_free(lexer);
+    free(src);
+}
+
 int main(int argc, const char *argv[])
 {
     // All fun and games
@@ -45,8 +53,8 @@ int main(int argc, const char *argv[])
     struct CompilerContext context = create_compiler_context(MAIN);
 
     if (argc < 2) {
-        report_error(__FILE__, context.line, context.col, FATAL, "Usage: noctis <filepath>",
-                     &context);
+        report_error(__FILE__, context.source.line, context.source.col, FATAL,
+                     "Usage: noctis <filepath>", &context);
         print_diagnostic_messages(context.message_array, context.num_of_errors);
         free_diagnostic_message_dynarray(context.message_array);
         return EXIT_FAILURE;
@@ -57,8 +65,8 @@ int main(int argc, const char *argv[])
 
     // check source before calling lex_file
     if (!src) {
-        report_error(__FILE__, context.line, context.col, FATAL, "Failed to read source file.\n",
-                     &context);
+        report_error(__FILE__, context.source.line, context.source.col, FATAL,
+                     "Failed to read source file.\n", &context);
         print_diagnostic_messages(context.message_array, context.num_of_errors);
         free_diagnostic_message_dynarray(context.message_array);
         free(src);
@@ -70,22 +78,15 @@ int main(int argc, const char *argv[])
     printf("Lexer Status: %d\n", lexer.status);
 
     if (lexer.status == LEXER_ERROR) {  // ERROR and FATAL cause program to exit with failure
-        print_diagnostic_messages(context.message_array, context.num_of_errors);
-        lexer_free(&lexer);
-        free_diagnostic_message_dynarray(context.message_array);
-        free(src);
+        cleanup_and_exit(context, src, &lexer);
         return EXIT_FAILURE;
     } else if (context.num_of_errors > 0) {     // Non-fatal errors, continue but print errors
-        print_diagnostic_messages(context.message_array, context.num_of_errors);
-        lexer_free(&lexer);
-        free_diagnostic_message_dynarray(context.message_array);
-        free(src);
+        cleanup_and_exit(context, src, &lexer);
+        return EXIT_FAILURE;
     } else {                    // no errors, continue as normal
         printf("\nLexer size: %zu\n\n", lexer.size);
         lexer_dump(&lexer);
-        lexer_free(&lexer);
-        free_diagnostic_message_dynarray(context.message_array);
-        free(src);
+        cleanup_and_exit(context, src, &lexer);
     }
 
     return EXIT_SUCCESS;

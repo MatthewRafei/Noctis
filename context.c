@@ -9,10 +9,11 @@ struct CompilerContext create_compiler_context(enum CurrentStage stage)
     context.stage = stage;
     context.message_array = inital_diagnostic_system();
     context.num_of_errors = 0;
-
-    // Maybe these need to be variadic or something
-    context.line = 0;
-    context.col = 0;
+    context.source = (struct SourceLocation) {
+        .file = NULL,
+        .line = 0,
+        .col = 0
+    };
 
     return context;
 }

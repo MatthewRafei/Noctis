@@ -24,7 +24,7 @@ struct DiagnosticMessage *inital_diagnostic_system(void);
 struct DiagnosticMessage create_message(const char *file, const size_t line, const size_t col,
                                         const enum ErrorLevel level, const char *fmt);
 void push_error(struct DiagnosticMessage *message_array, struct DiagnosticMessage message,
-                const struct CompilerContext *context);
+                const size_t number_of_errors);
 struct DiagnosticMessage *create_diagnostic_message_dynarray(void);
 void free_diagnostic_message_dynarray(struct DiagnosticMessage *message_array);
 void print_diagnostic_messages(const struct DiagnosticMessage *message_array,

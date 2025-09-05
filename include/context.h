@@ -3,6 +3,12 @@
 
 #include <stdlib.h>
 
+struct SourceLocation {
+    const char *file;
+    size_t line;
+    size_t col;
+};
+
 enum CurrentStage {
     MAIN,
     LEXING,
@@ -18,7 +24,7 @@ struct CompilerContext {
     enum CurrentStage stage;
     struct DiagnosticMessage *message_array;
     size_t num_of_errors;
-    size_t line, col;
+    struct SourceLocation source;
 };
 
 struct CompilerContext create_compiler_context(enum CurrentStage stage);
