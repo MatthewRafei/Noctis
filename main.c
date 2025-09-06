@@ -53,9 +53,10 @@ int main(int argc, const char *argv[])
     struct CompilerContext context = create_compiler_context(MAIN);
 
     if (argc < 2) {
-        report_error(__FILE__, context.source.line, context.source.col, FATAL,
-                     "Usage: noctis <filepath>", &context);
-        print_diagnostic_messages(context.message_array, context.num_of_errors);
+        //report_error(FATAL, "Usage ./noctis <filepath>", &context);
+        //print_diagnostic_messages(context.message_array, context.num_of_errors);
+
+        (void) fprintf(stderr, "Usage: ./noctis <filepath>\n");
         free_diagnostic_message_dynarray(context.message_array);
         return EXIT_FAILURE;
     }
@@ -65,8 +66,7 @@ int main(int argc, const char *argv[])
 
     // check source before calling lex_file
     if (!src) {
-        report_error(__FILE__, context.source.line, context.source.col, FATAL,
-                     "Failed to read source file.\n", &context);
+        report_error(FATAL, "No source file or is null, did file_to_str fail?", &context);
         print_diagnostic_messages(context.message_array, context.num_of_errors);
         free_diagnostic_message_dynarray(context.message_array);
         free(src);
@@ -75,7 +75,7 @@ int main(int argc, const char *argv[])
     // Lexer
     modify_compiler_context_stage(&context, LEXING);
     struct Lexer lexer = lex_file(src, fp, &context, LEXER_OK);
-    printf("Lexer Status: %d\n", lexer.status);
+    printf("\nLexer Status: %s\n", enum_lexer_status_to_str(lexer.status));
 
     if (lexer.status == LEXER_ERROR) {  // ERROR and FATAL cause program to exit with failure
         cleanup_and_exit(context, src, &lexer);

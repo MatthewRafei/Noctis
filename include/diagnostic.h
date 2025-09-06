@@ -18,11 +18,11 @@ struct DiagnosticMessage {
     const char *fmt;
 };
 
-void report_error(const char *file, const size_t line, const size_t col,
-                  const enum ErrorLevel level, const char *fmt, struct CompilerContext *context);
+char *enum_error_to_str(enum ErrorLevel level);
+void report_error(const enum ErrorLevel level, const char *fmt, struct CompilerContext *context);
 struct DiagnosticMessage *inital_diagnostic_system(void);
-struct DiagnosticMessage create_message(const char *file, const size_t line, const size_t col,
-                                        const enum ErrorLevel level, const char *fmt);
+struct DiagnosticMessage create_message(const enum ErrorLevel level, const char *fmt,
+                                        struct CompilerContext *context);
 void push_error(struct DiagnosticMessage *message_array, struct DiagnosticMessage message,
                 const size_t number_of_errors);
 struct DiagnosticMessage *create_diagnostic_message_dynarray(void);

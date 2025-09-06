@@ -36,10 +36,9 @@ struct DiagnosticMessage *inital_diagnostic_system(void)
     return message_array;
 }
 
-void report_error(const char *file, const size_t line, const size_t col,
-                  const enum ErrorLevel level, const char *fmt, struct CompilerContext *context)
+void report_error(const enum ErrorLevel level, const char *fmt, struct CompilerContext *context)
 {
-    struct DiagnosticMessage message = create_message(file, line, col, level, fmt);
+    struct DiagnosticMessage message = create_message(level, fmt, context);
 
     push_error(context->message_array, message, context->num_of_errors);
 
@@ -57,15 +56,14 @@ struct SourceLocation {
 
 create_message((struct SourceLocation){ "main.c", 42, 17 }, ERROR_FATAL, "oops");
 */
-struct DiagnosticMessage create_message(const char *file, const size_t line, const size_t col,
-                                        const enum ErrorLevel level, const char *fmt)
+struct DiagnosticMessage create_message(const enum ErrorLevel level, const char *fmt,
+                                        struct CompilerContext *context)
 {
     struct DiagnosticMessage message;
 
-    message.file = file;
-    message.line = line;
-    message.col = col;
-
+    message.file = context->source.file;
+    message.line = context->source.line;
+    message.col = context->source.col;
     message.level = level;
     message.fmt = fmt;
 
@@ -92,9 +90,27 @@ void free_diagnostic_message_dynarray(struct DiagnosticMessage *message_array)
 void print_diagnostic_messages(const struct DiagnosticMessage *message_array,
                                const size_t num_of_errors)
 {
-    printf("Total Errors: %zu\n", num_of_errors);
+    printf("\nTotal Errors: %zu\n\n", num_of_errors);
     for (size_t i = 0; i < num_of_errors; ++i) {
-        (void) fprintf(stderr, "Error: %s:%zu:%zu: %s\n", message_array[i].file,
-                       message_array[i].line, message_array[i].col, message_array[i].fmt);
+        (void) fprintf(stderr, "%s %s:%zu:%zu: %s\n", enum_error_to_str(message_array[i].level),
+                       message_array[i].file, message_array[i].line, message_array[i].col,
+                       message_array[i].fmt);
     }
+}
+
+char *enum_error_to_str(enum ErrorLevel level)
+{
+    switch (level) {
+        case INFO:
+            return "INFO: ";
+        case WARNING:
+            return "WARNING: ";
+        case ERROR:
+            return "ERROR: ";
+        case FATAL:
+            return "FATAL: ";
+        default:
+            (void) fprintf(stderr, "You found a bug in the compiler!, please report it.\n");
+    }
+    return "You found a bug in the compiler!, please report it.\n";
 }

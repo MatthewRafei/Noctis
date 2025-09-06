@@ -246,14 +246,12 @@ struct Lexer lex_file(char *src, const char *fp, struct CompilerContext *context
                 c_counter += 1;
 
                 if (src[i + counter] == '(' && src[i + counter + 1] == '*') {
-                    report_error(context->source.file, line, col, ERROR,
-                                 "Nested multi-line comments are not supported.\n", context);
+                    report_error(ERROR, "Nested multi-line comments are not supported.", context);
                 }
             }
             // What if string is not Buffer Null-Termination?
             if (!src[i + counter]) {
-                report_error(context->source.file, line, col, FATAL,
-                             "Unterminated multi-line comment.\n", context);
+                report_error(FATAL, "Unterminated multi-line comment.\n", context);
                 lexer.status = LEXER_ERROR;
             }
             // 2 because we need to skip '*)'
@@ -307,8 +305,7 @@ struct Lexer lex_file(char *src, const char *fp, struct CompilerContext *context
             // You reference closing_quote in the string literal parsing, but it's not defined.
             // You should ensure that you compare against ch, which holds the opening quote:
             if (src[i + len] != ch) {
-                report_error(context->source.file, line, col, FATAL,
-                             "Unterminated string literal.\n", context);
+                report_error(FATAL, "Unterminated string literal.\n", context);
                 lexer.status = LEXER_ERROR;
                 s_umap_free(&sym_keyword_tbl);
                 return lexer;
@@ -393,4 +390,21 @@ void lexer_free(struct Lexer *l)
     }
     l->hd = l->tl = NULL;
     l->size = 0;
+}
+
+char *enum_lexer_status_to_str(enum Lexer_Status status)
+{
+    switch (status) {
+        case LEXER_ERROR:
+            return "LEXER_ERROR";
+        case LEXER_OK:
+            return "LEXER_OK";
+        default:
+            (void) fprintf(stderr, "You found a bug in the compiler!, please report.\n");
+            (void) fprintf(stderr, "Compiler bug happened in file: %s in function: %s.\n", __FILE__,
+                           __func__);
+            exit(EXIT_FAILURE);
+    }
+
+    return "Compiler bug happened in file: %s in function: %s.\n";
 }

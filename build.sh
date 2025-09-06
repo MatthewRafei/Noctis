@@ -10,6 +10,9 @@
 # -- Flags --
 set -xe
 
+# -- Debug or Release mode --
+# Usage: ./build.sh [DEBUG|RELEASE]
+# debug if no argument is given
 MODE=${1:-DEBUG}
 
 CC=cc
@@ -22,7 +25,7 @@ OUT="noctis"
 
 if [ "$MODE" = "DEBUG" ]; then
     CFLAGS="$COMMON_FLAGS -std=gnu17 -g -O0 $SANITIZE"
-elif [ "$MODE" = "RELEASE" ]; then
+elif [ "$MODE" = "RELEASE" ]; the
     CFLAGS="$COMMON_FLAGS -std=gnu17 -O2"
 else
     echo "Unknown mode: $MODE"
@@ -30,7 +33,14 @@ else
 fi
 
 # --- Compile step ---
-$CC $INCLUDE $CFLAGS -o $OUT $SRC
+if command -v $CC &> /dev/null; then
+    $CC $INCLUDE $CFLAGS -o $OUT $SRC
+    echo "Compilation successful."
+else
+    echo "Compilation failed."
+    exit EXIT_FAILURE
+fi
+
 
 # --- Static analysis section ---
 # Run cppcheck if installed

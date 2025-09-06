@@ -80,7 +80,6 @@ struct Token {
 
 struct Token *token_alloc(enum Token_Type type,
                           const char *lexeme, size_t end, const char *fp, size_t row, size_t col);
-
 void token_dump(const struct Token *t);
 char *enum_to_str(enum Token_Type type);
 

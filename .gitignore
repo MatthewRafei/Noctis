@@ -1,5 +1,5 @@
 noctis
-.vscode/
+.vscode
 .indent_backup
 *.plist
 *.o
