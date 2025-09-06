@@ -14,10 +14,6 @@ enum CurrentStage {
     LEXING,
     PARSING,
     SEMANTIC_ANALYSIS,
-    CODEGEN,
-    OPTIMIZATION,
-    ASSEMBLY,
-    LINKING
 };
 
 struct CompilerContext {

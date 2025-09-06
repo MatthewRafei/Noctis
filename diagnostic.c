@@ -7,6 +7,10 @@
 #include <string.h>
 
 /*
+INTERNAL →
+Something that should never happen (e.g. "null pointer dereference", "out of memory").
+Indicates a bug in the compiler.
+
 INFO →
 Extra messages for the user (e.g. "unused variable", "compilation started").
 Never stops compilation.
@@ -17,11 +21,12 @@ Should not stop compilation. Collect them all and print later.
 
 ERROR →
 A definite violation of the language rules (e.g. "expected ; after statement").
-Usually compilation cannot continue successfully, but you want to recover and gather more errors so the user doesn’t have to fix one at a time.
-→ Standard practice: log and continue as long as possible, but prevent emitting an executable/output at the end.
+Usually compilation cannot continue successfully, but you want to recover and gather more errors so the user doesn’t have to fix one at a time. 
+Standard practice: log and continue as long as possible, but prevent emitting an executable/output at the end.
 
 FATAL →
-Something unrecoverable that prevents even further analysis (e.g. "out of memory", "could not open source file"). Compilation must stop immediately.
+Unrecoverable error in lexer, parser, semantic analysis. (e.g. user facing lexer/parser errors).
+Stops compilation immediately.
 */
 
 // TODO(malac0da): SAVE as many INFO,WARNINGs, and ERRORS into a list as possible to print all at once when compilation fails or is finished.
@@ -45,17 +50,6 @@ void report_error(const enum ErrorLevel level, const char *fmt, struct CompilerC
     context->num_of_errors += 1;
 }
 
-/*
-TODO(malac0da): Implement this struct to hold source location information so we dont have to pass in so many arguments
-
-struct SourceLocation {
-    const char *file;
-    size_t line;
-    size_t col;
-};
-
-create_message((struct SourceLocation){ "main.c", 42, 17 }, ERROR_FATAL, "oops");
-*/
 struct DiagnosticMessage create_message(const enum ErrorLevel level, const char *fmt,
                                         struct CompilerContext *context)
 {
@@ -101,6 +95,8 @@ void print_diagnostic_messages(const struct DiagnosticMessage *message_array,
 char *enum_error_to_str(enum ErrorLevel level)
 {
     switch (level) {
+        case INTERNAL:
+            return "INTERNAL: ";
         case INFO:
             return "INFO: ";
         case WARNING:

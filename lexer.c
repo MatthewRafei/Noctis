@@ -19,10 +19,17 @@ TODO(malac0da):
 - Add more unit tests for edge cases (unterminated strings, comments, etc.).
 
 - Refactor error handling to avoid exit() calls; return error codes or use callbacks.
-- Use fprintf(stderr, ...) for error messages instead of printf.
 - Handle nested multi-line comments or provide clearer error recovery.
 - Improve comments and error messages for maintainability.
 
+- Support escape sequences in string and character literals.
+- Make character literals distinct from string literals.
+
+- Benchmark and possibly replace consume_while with strspn for performance.
+- Consider dynamic allocation for buffers (e.g., in determine_symbol).
+- Improve predicate logic for operators (not_sym may miss cases).
+*/
+/*
 - Common escape sequences to support:
 \n: Represents a newline character.
 \t: Represents a horizontal tab character.
@@ -33,18 +40,16 @@ TODO(malac0da):
 \b: Represents a backspace character.
 \f: Represents a form feed character.
 \v: Represents a vertical tab character.
-
-- Support escape sequences in string and character literals.
-- Make character literals distinct from string literals.
-
-- Benchmark and possibly replace consume_while with strspn for performance.
-- Consider dynamic allocation for buffers (e.g., in determine_symbol).
-- Improve predicate logic for operators (not_sym may miss cases).
 */
 
-static struct S_Umap init_sym_keyword_tbl(void)
+struct S_Umap init_sym_keyword_tbl(struct CompilerContext *context)
 {
-    struct S_Umap tbl = s_umap_create(fnv1a, sizeof(enum Token_Type));
+    struct S_Umap tbl = s_umap_create(fnv1a, sizeof(enum Token_Type), context);
+
+    if (!tbl.tbl.nodes) {
+        report_error(FATAL, "Failed to create symbol/keyword table in lexer.\n", context);
+        return (struct S_Umap) { 0 };
+    }
 
     char *syms[] = {
         "(", ")",               // TOKEN_LPAREN, TOKEN_RPAREN
@@ -184,9 +189,7 @@ enum Token_Type *determine_symbol(const char *s,
         // just incase
         buf[op_len] = '\0';
     } else {
-        //Error out properly when you can 
-        printf("Error at determine_symbol\n");
-        exit(1);
+        return NULL;
     }
 
     for (int i = (int)op_len - 1; i >= 0; --i) {
@@ -207,16 +210,23 @@ int not_quote(int c)
 struct Lexer lex_file(char *src, const char *fp, struct CompilerContext *context,
                       enum Lexer_Status status)
 {
-    context->source.file = fp;
-
-    struct S_Umap sym_keyword_tbl = init_sym_keyword_tbl();
-
     struct Lexer lexer = (struct Lexer) {
         .hd = NULL,
         .tl = NULL,
     };
 
     lexer.status = status;
+
+    context->source.file = fp;
+
+    struct S_Umap sym_keyword_tbl = init_sym_keyword_tbl(context);
+
+    if (!sym_keyword_tbl.tbl.nodes) {
+        report_error(FATAL, "Failed to create symbol/keyword table in lexer.\n", context);
+        s_umap_free(&sym_keyword_tbl);
+        lexer.status = LEXER_ERROR;
+        return lexer;
+    }
 
     size_t i = 0, line = 1, col = 1;
     while (src[i] != '\0') {
@@ -246,11 +256,15 @@ struct Lexer lex_file(char *src, const char *fp, struct CompilerContext *context
                 c_counter += 1;
 
                 if (src[i + counter] == '(' && src[i + counter + 1] == '*') {
-                    report_error(ERROR, "Nested multi-line comments are not supported.", context);
+                    context->source.line = line + r_counter;
+                    context->source.col = col + c_counter;
+                    report_error(ERROR, "Nested multi-line comments are not supported.\n", context);
                 }
             }
             // What if string is not Buffer Null-Termination?
             if (!src[i + counter]) {
+                context->source.line = line + r_counter;
+                context->source.col = col + c_counter;
                 report_error(FATAL, "Unterminated multi-line comment.\n", context);
                 lexer.status = LEXER_ERROR;
             }
@@ -305,6 +319,8 @@ struct Lexer lex_file(char *src, const char *fp, struct CompilerContext *context
             // You reference closing_quote in the string literal parsing, but it's not defined.
             // You should ensure that you compare against ch, which holds the opening quote:
             if (src[i + len] != ch) {
+                context->source.line = line;
+                context->source.col = col - 1;  // Adjust column to point to the opening quote
                 report_error(FATAL, "Unterminated string literal.\n", context);
                 lexer.status = LEXER_ERROR;
                 s_umap_free(&sym_keyword_tbl);
@@ -359,9 +375,11 @@ struct Lexer lex_file(char *src, const char *fp, struct CompilerContext *context
             const enum Token_Type *type = determine_symbol(src + i, op_len, &sym_keyword_tbl, &len);
 
             if (!type) {
-                // TODO(malac0da): Replace with proper error handling
-                printf("Invalid type at: %s\n on line: %zu col: %zu\n", src + i, line, col);
+                context->source.line = line;
+                context->source.col = col;
+                report_error(FATAL, "Invalid symbol.\n", context);
                 lexer.status = LEXER_ERROR;
+                s_umap_free(&sym_keyword_tbl);
                 return lexer;
             }
 
@@ -396,9 +414,9 @@ char *enum_lexer_status_to_str(enum Lexer_Status status)
 {
     switch (status) {
         case LEXER_ERROR:
-            return "LEXER_ERROR";
+            return "ERROR";
         case LEXER_OK:
-            return "LEXER_OK";
+            return "PYRRHIC VICTORY";
         default:
             (void) fprintf(stderr, "You found a bug in the compiler!, please report.\n");
             (void) fprintf(stderr, "Compiler bug happened in file: %s in function: %s.\n", __FILE__,

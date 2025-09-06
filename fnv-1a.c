@@ -1,5 +1,6 @@
 #include "diagnostic.h"
 #include "context.h"
+#include "fnv-1a.h"
 
 #include <stddef.h>
 #include <stdint.h>
@@ -15,14 +16,13 @@ TODO(malac0da):
 #define FNV_PRIME 16777619
 #define FNV_OFFSET_BASIS 2166136261
 
-uint32_t fnv1a(const char *key)
+unsigned long fnv1a(const char *key)
 {
     if (!key) {                 // TODO(malac0da): Report error for null key
-        //report_error("FNV-1a: NULL key provided.\n");
         return 0;
     }
     // FNV-1a offset basis
-    uint32_t hash = FNV_OFFSET_BASIS;
+    unsigned long hash = FNV_OFFSET_BASIS;
     // strlen ensures that the string is null-terminated. So checking for it is redundant
     size_t length = strlen(key);
 

@@ -1,6 +1,8 @@
 #ifndef DS_S_UMAP_H
 #define DS_S_UMAP_H
 
+#include "context.h"
+
 #include <stddef.h>
 
 typedef unsigned long (*s_umap_hash)(const char *);
@@ -26,7 +28,7 @@ struct S_Umap {
     size_t nodev_stride;
 };
 
-struct S_Umap s_umap_create(s_umap_hash hash, size_t nodev_stride);
+struct S_Umap s_umap_create(s_umap_hash hash, size_t nodev_stride, struct CompilerContext *context);
 struct S_Umap_Node *s_umap_node_create(const char *key, const void *value, size_t nodev_stride);
 void s_umap_insert(struct S_Umap *map, const char *key, const void *value);
 void s_umap_free(struct S_Umap *map);

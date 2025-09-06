@@ -41,8 +41,12 @@ void cleanup_and_exit(struct CompilerContext context, char *src, struct Lexer *l
 {
     print_diagnostic_messages(context.message_array, context.num_of_errors);
     free_diagnostic_message_dynarray(context.message_array);
-    lexer_free(lexer);
-    free(src);
+    if (lexer) {
+        lexer_free(lexer);
+    }
+    if (src) {
+        free(src);
+    }
 }
 
 int main(int argc, const char *argv[])
@@ -53,29 +57,24 @@ int main(int argc, const char *argv[])
     struct CompilerContext context = create_compiler_context(MAIN);
 
     if (argc < 2) {
-        //report_error(FATAL, "Usage ./noctis <filepath>", &context);
-        //print_diagnostic_messages(context.message_array, context.num_of_errors);
-
-        (void) fprintf(stderr, "Usage: ./noctis <filepath>\n");
-        free_diagnostic_message_dynarray(context.message_array);
+        report_error(FATAL, "No file arguments - Usage: ./noctis <filepath>", &context);
+        cleanup_and_exit(context, NULL, NULL);
         return EXIT_FAILURE;
     }
 
     const char *fp = argv[1];
-    char *src = file_to_str(fp);
+    char *src = file_to_str(fp, &context);
 
     // check source before calling lex_file
     if (!src) {
-        report_error(FATAL, "No source file or is null, did file_to_str fail?", &context);
-        print_diagnostic_messages(context.message_array, context.num_of_errors);
-        free_diagnostic_message_dynarray(context.message_array);
-        free(src);
+        report_error(FATAL, "No source file/s or is null.", &context);
+        cleanup_and_exit(context, NULL, NULL);
         return EXIT_FAILURE;
     }
     // Lexer
     modify_compiler_context_stage(&context, LEXING);
     struct Lexer lexer = lex_file(src, fp, &context, LEXER_OK);
-    printf("\nLexer Status: %s\n", enum_lexer_status_to_str(lexer.status));
+    //printf("\nLexer Status: %s\n", enum_lexer_status_to_str(lexer.status));
 
     if (lexer.status == LEXER_ERROR) {  // ERROR and FATAL cause program to exit with failure
         cleanup_and_exit(context, src, &lexer);

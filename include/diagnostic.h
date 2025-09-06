@@ -4,6 +4,7 @@
 #include "context.h"
 
 enum ErrorLevel {
+    INTERNAL,
     INFO,
     WARNING,
     ERROR,

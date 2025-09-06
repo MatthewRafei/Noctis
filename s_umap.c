@@ -1,3 +1,5 @@
+#include "context.h"
+#include "diagnostic.h"
 #include "ds/s_umap.h"
 #include "fnv-1a.h"
 #include "token.h"
@@ -12,10 +14,6 @@
 
 /*
 TODO(malac0da):
-- Use fprintf(stderr, ...) for error messages.
-
-- Fix typo: INITIAL_CAPACITY → INITIAL_CAPACITY.
-
 - Only increment map->tbl.len for new keys, not replacements.
 - Check for allocation failures in s_umap_node_create and handle gracefully.
 
@@ -28,9 +26,12 @@ TODO(malac0da):
 
 #define INITIAL_CAPACITY 1024
 
-struct S_Umap s_umap_create(s_umap_hash hash, size_t nodev_stride)
+struct S_Umap s_umap_create(s_umap_hash hash, size_t nodev_stride, struct CompilerContext *context)
 {
-    assert(hash);
+    if (!hash) {
+        report_error(INTERNAL, "s_umap_create: NULL hash function provided.\n", context);
+        return (struct S_Umap) { 0 };
+    }
 
     struct S_Umap map = (struct S_Umap) {
         .tbl = {
