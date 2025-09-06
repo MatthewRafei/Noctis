@@ -25,7 +25,7 @@ OUT="noctis"
 
 if [ "$MODE" = "DEBUG" ]; then
     CFLAGS="$COMMON_FLAGS -std=gnu17 -g -O0 $SANITIZE"
-elif [ "$MODE" = "RELEASE" ]; the
+elif [ "$MODE" = "RELEASE" ]; then
     CFLAGS="$COMMON_FLAGS -std=gnu17 -O2"
 else
     echo "Unknown mode: $MODE"
