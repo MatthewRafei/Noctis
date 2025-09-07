@@ -31,7 +31,6 @@ Stops compilation immediately.
 
 // TODO(malac0da): SAVE as many INFO,WARNINGs, and ERRORS into a list as possible to print all at once when compilation fails or is finished.
 // TODO(malac0da): Finish dynamic array
-// TODO(malac0da): Build function that turns enum types to strings or hard code strings? idk what is best yet.
 
 #define DYNARR_INITIAL_SIZE 16
 
@@ -69,6 +68,14 @@ struct DiagnosticMessage *create_diagnostic_message_dynarray(void)
     return (struct DiagnosticMessage *) malloc(DYNARR_INITIAL_SIZE *
                                                sizeof(struct DiagnosticMessage));
 }
+
+/*
+struct DiagnosticMessage *double_diagnostic_dynarray_size(struct DiagnosticMessage *message_array)
+{
+    struct DiagnosticMessage *new_array = realloc(message_array, (sizeof(message_array) * 2));
+    return new_array;
+}
+*/
 
 void push_error(struct DiagnosticMessage *message_array, struct DiagnosticMessage message,
                 const size_t number_of_errors)

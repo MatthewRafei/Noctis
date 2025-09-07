@@ -11,6 +11,16 @@ enum ErrorLevel {
     FATAL
 };
 
+// Absoultely stupid to forget to track capacity so now we gotta rewrite
+// TODO(malac0da): Impliment this struct and rewrite the system.
+/*
+struct DiagnosticArray {
+    struct DiagnosticMessage *data;
+    size_t len;      // number of messages actually stored
+    size_t capacity; // allocated slots
+};
+*/
+
 struct DiagnosticMessage {
     const char *file;
     size_t line;

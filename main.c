@@ -74,7 +74,6 @@ int main(int argc, const char *argv[])
     // Lexer
     modify_compiler_context_stage(&context, LEXING);
     struct Lexer lexer = lex_file(src, fp, &context, LEXER_OK);
-    //printf("\nLexer Status: %s\n", enum_lexer_status_to_str(lexer.status));
 
     if (lexer.status == LEXER_ERROR) {  // ERROR and FATAL cause program to exit with failure
         cleanup_and_exit(context, src, &lexer);
@@ -87,6 +86,9 @@ int main(int argc, const char *argv[])
         lexer_dump(&lexer);
         cleanup_and_exit(context, src, &lexer);
     }
+
+    printf("Lexer Status: %s\n", enum_lexer_status_to_str(lexer.status));
+
 
     return EXIT_SUCCESS;
 }
