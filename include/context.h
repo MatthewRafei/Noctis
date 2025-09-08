@@ -1,6 +1,8 @@
 #ifndef CONTEXT_H
 #define CONTEXT_H
 
+#include "diagnostic.h"
+
 #include <stdlib.h>
 
 struct SourceLocation {
@@ -18,8 +20,7 @@ enum CurrentStage {
 
 struct CompilerContext {
     enum CurrentStage stage;
-    struct DiagnosticMessage *message_array;
-    size_t num_of_errors;
+    struct DiagnosticArray *array;
     struct SourceLocation source;
 };
 

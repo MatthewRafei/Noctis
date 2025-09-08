@@ -8,7 +8,7 @@
 # TODO(malac0da): Learn how to implement unit tests and fuzzers into the build process
 
 # -- Flags --
-set -xe
+set -e
 
 # -- Debug or Release mode --
 # Usage: ./build.sh [DEBUG|RELEASE]
@@ -18,18 +18,19 @@ MODE=${1:-DEBUG}
 CC=cc
 INCLUDE="-Iinclude/"
 COMMON_FLAGS="-Wall -Wextra -Wshadow -Wconversion -Wundef -Werror -pedantic -fanalyzer"
-SANITIZE="-fsanitize=address,undefined"
+SANITIZE="-fsanitize=address,undefined -fno-omit-frame-pointer"
 
 SRC="*.c"
 OUT="noctis"
 
 if [ "$MODE" = "DEBUG" ]; then
+    set -x
     CFLAGS="$COMMON_FLAGS -std=gnu17 -g -O0 $SANITIZE"
 elif [ "$MODE" = "RELEASE" ]; then
     CFLAGS="$COMMON_FLAGS -std=gnu17 -O2"
 else
     echo "Unknown mode: $MODE"
-    exit EXIT_FAILURE
+    exit 1
 fi
 
 # --- Compile step ---
@@ -38,9 +39,8 @@ if command -v $CC &> /dev/null; then
     echo "Compilation successful."
 else
     echo "Compilation failed."
-    exit EXIT_FAILURE
+    exit 1
 fi
-
 
 # --- Static analysis section ---
 # Run cppcheck if installed

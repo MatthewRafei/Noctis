@@ -1,6 +1,8 @@
 #include "diagnostic.h"
 #include "context.h"
+#include "utils.h"
 
+#include <assert.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -34,19 +36,30 @@ Stops compilation immediately.
 
 #define DYNARR_INITIAL_SIZE 16
 
-struct DiagnosticMessage *inital_diagnostic_system(void)
+struct DiagnosticArray *inital_diagnostic_system(void)
 {
-    struct DiagnosticMessage *message_array = create_diagnostic_message_dynarray();
-    return message_array;
+    struct DiagnosticArray *diagnostic_array = create_diagnostic_array();
+    return diagnostic_array;
+}
+
+struct DiagnosticArray *create_diagnostic_array(void)
+{
+    struct DiagnosticArray *ar =
+        (struct DiagnosticArray *) s_malloc(sizeof(struct DiagnosticArray));
+    ar->data =
+        (struct DiagnosticMessage *) malloc(DYNARR_INITIAL_SIZE * sizeof(struct DiagnosticMessage));
+    ar->len = 0;
+    ar->capacity = DYNARR_INITIAL_SIZE;
+    return ar;
 }
 
 void report_error(const enum ErrorLevel level, const char *fmt, struct CompilerContext *context)
 {
     struct DiagnosticMessage message = create_message(level, fmt, context);
 
-    push_error(context->message_array, message, context->num_of_errors);
+    push_error(context->array, message, context->array->len);
 
-    context->num_of_errors += 1;
+    context->array->len += 1;
 }
 
 struct DiagnosticMessage create_message(const enum ErrorLevel level, const char *fmt,
@@ -63,41 +76,41 @@ struct DiagnosticMessage create_message(const enum ErrorLevel level, const char 
     return message;
 }
 
-struct DiagnosticMessage *create_diagnostic_message_dynarray(void)
+
+void push_error(struct DiagnosticArray *array, struct DiagnosticMessage message,
+                const size_t number_of_errors)
 {
-    return (struct DiagnosticMessage *) malloc(DYNARR_INITIAL_SIZE *
-                                               sizeof(struct DiagnosticMessage));
+    //assert(number_of_errors < DYNARR_INITIAL_SIZE);
+    array->data[number_of_errors] = message;
 }
 
+
 /*
-struct DiagnosticMessage *double_diagnostic_dynarray_size(struct DiagnosticMessage *message_array)
+struct DiagnosticMessage *double_diagnostic_array_size(struct DiagnosticMessage *message_array)
 {
     struct DiagnosticMessage *new_array = realloc(message_array, (sizeof(message_array) * 2));
     return new_array;
 }
 */
 
-void push_error(struct DiagnosticMessage *message_array, struct DiagnosticMessage message,
-                const size_t number_of_errors)
+
+void free_diagnostic_array(struct DiagnosticArray *array)
 {
-    message_array[number_of_errors] = message;
+    free(array);
 }
 
-void free_diagnostic_message_dynarray(struct DiagnosticMessage *message_array)
-{
-    free(message_array);
-}
 
-void print_diagnostic_messages(const struct DiagnosticMessage *message_array,
-                               const size_t num_of_errors)
+
+void print_diagnostic_messages(const struct DiagnosticArray *array, const size_t num_of_errors)
 {
     printf("\nTotal Errors: %zu\n\n", num_of_errors);
     for (size_t i = 0; i < num_of_errors; ++i) {
-        (void) fprintf(stderr, "%s %s:%zu:%zu: %s\n", enum_error_to_str(message_array[i].level),
-                       message_array[i].file, message_array[i].line, message_array[i].col,
-                       message_array[i].fmt);
+        (void) fprintf(stderr, "%s %s:%zu:%zu: %s\n", enum_error_to_str(array->data[i].level),
+                       array->data[i].file, array->data[i].line, array->data[i].col,
+                       array->data[i].fmt);
     }
 }
+
 
 char *enum_error_to_str(enum ErrorLevel level)
 {

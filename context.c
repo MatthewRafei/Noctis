@@ -7,8 +7,9 @@ struct CompilerContext create_compiler_context(enum CurrentStage stage)
 {
     struct CompilerContext context;
     context.stage = stage;
-    context.message_array = inital_diagnostic_system();
-    context.num_of_errors = 0;
+    context.array = inital_diagnostic_system();
+
+    context.array->len = 0;
     context.source = (struct SourceLocation) {
         .file = NULL,
         .line = 0,

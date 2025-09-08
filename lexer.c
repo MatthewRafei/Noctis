@@ -47,7 +47,7 @@ struct S_Umap init_sym_keyword_tbl(struct CompilerContext *context)
     struct S_Umap tbl = s_umap_create(fnv1a, sizeof(enum Token_Type), context);
 
     if (!tbl.tbl.nodes) {
-        report_error(FATAL, "Failed to create symbol/keyword table in lexer.\n", context);
+        //report_error(FATAL, "Failed to create symbol/keyword table in lexer.\n", context);
         return (struct S_Umap) { 0 };
     }
 
@@ -95,6 +95,7 @@ struct S_Umap init_sym_keyword_tbl(struct CompilerContext *context)
         s_umap_insert(&tbl, kws[i], (void *) &token);
     }
 
+    // TODO(malac0da): Please move this to a debug or find a way to only run functions with
     printf("\nThere are %zu symbols in the language\n", (sizeof(syms) / sizeof(*syms)));
     for (size_t i = 0; i < (sizeof(syms) / sizeof(*syms)); i++) {
         printf("Symbol: %s -> Token: %d\n",
@@ -110,6 +111,8 @@ struct S_Umap init_sym_keyword_tbl(struct CompilerContext *context)
 
     return tbl;
 }
+
+//void print_keywords_and_symbols(char &syms,  )
 
 static void lexer_append(struct Lexer *l, struct Token *t)
 {
@@ -418,11 +421,11 @@ char *enum_lexer_status_to_str(enum Lexer_Status status)
         case LEXER_OK:
             return "PYRRHIC VICTORY";
         default:
-            (void) fprintf(stderr, "You found a bug in the compiler!, please report.\n");
+            (void) fprintf(stderr, "You found a bug in the compiler. Please report it!\n");
             (void) fprintf(stderr, "Compiler bug happened in file: %s in function: %s.\n", __FILE__,
                            __func__);
             exit(EXIT_FAILURE);
     }
 
-    return "Compiler bug happened in file: %s in function: %s.\n";
+    return "Compiler bug happened in \"enum_lexer_status_to_str\" function. Please report it!\n";
 }

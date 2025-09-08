@@ -14,7 +14,7 @@ char *file_to_str(const char *fp, struct CompilerContext *context)
         context->source.file = fp;
         context->source.line = 0;
         context->source.col = 0;
-        report_error(INTERNAL, "Failed to open file.", context);
+        //report_error(INTERNAL, "Failed to open file.", context);
         return NULL;
     }
 
@@ -22,7 +22,7 @@ char *file_to_str(const char *fp, struct CompilerContext *context)
         context->source.file = fp;
         context->source.line = 0;
         context->source.col = 0;
-        report_error(INTERNAL, "Failed to seek file.", context);
+        //report_error(INTERNAL, "Failed to seek file.", context);
         (void) fclose(file);
         return NULL;
     }
@@ -31,7 +31,7 @@ char *file_to_str(const char *fp, struct CompilerContext *context)
         context->source.file = fp;
         context->source.line = 0;
         context->source.col = 0;
-        report_error(INTERNAL, "Failed to determine file length.", context);
+        //report_error(INTERNAL, "Failed to determine file length.", context);
         (void) fclose(file);
         return NULL;
     }
@@ -43,7 +43,7 @@ char *file_to_str(const char *fp, struct CompilerContext *context)
         context->source.file = fp;
         context->source.line = 0;
         context->source.col = 0;
-        report_error(INTERNAL, "Failed to determine file length.", context);
+        //report_error(INTERNAL, "Failed to determine file length.", context);
         (void) fclose(file);
         return NULL;
     }

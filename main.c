@@ -9,9 +9,6 @@
 /*
 TODO(malac0da):
 - Refactor error handling for consistency (prefer returning error codes or using EXIT_FAILURE).
-- Use fprintf(stderr, ...) for error output.
-
-- Fix typos and use more formal comments.
 
 - Implement multi-file support
 */
@@ -39,8 +36,9 @@ void print_ascii_logo(void)
 
 void cleanup_and_exit(struct CompilerContext context, char *src, struct Lexer *lexer)
 {
-    print_diagnostic_messages(context.message_array, context.num_of_errors);
-    free_diagnostic_message_dynarray(context.message_array);
+    print_diagnostic_messages(context.array, context.array->len);
+    free(context.array->data);
+    free_diagnostic_array(context.array);
     if (lexer) {
         lexer_free(lexer);
     }
@@ -67,7 +65,7 @@ int main(int argc, const char *argv[])
 
     // check source before calling lex_file
     if (!src) {
-        report_error(FATAL, "No source file/s or is null.", &context);
+        //report_error(FATAL, "No source file/s or is null.", &context);
         cleanup_and_exit(context, NULL, NULL);
         return EXIT_FAILURE;
     }
@@ -78,7 +76,7 @@ int main(int argc, const char *argv[])
     if (lexer.status == LEXER_ERROR) {  // ERROR and FATAL cause program to exit with failure
         cleanup_and_exit(context, src, &lexer);
         return EXIT_FAILURE;
-    } else if (context.num_of_errors > 0) {     // Non-fatal errors, continue but print errors
+    } else if (context.array->len > 0) {        // Non-fatal errors, continue but print errors
         cleanup_and_exit(context, src, &lexer);
         return EXIT_FAILURE;
     } else {                    // no errors, continue as normal
@@ -88,7 +86,6 @@ int main(int argc, const char *argv[])
     }
 
     printf("Lexer Status: %s\n", enum_lexer_status_to_str(lexer.status));
-
 
     return EXIT_SUCCESS;
 }
