@@ -65,7 +65,7 @@ int main(int argc, const char *argv[])
 
     // check source before calling lex_file
     if (!src) {
-        //report_error(FATAL, "No source file/s or is null.", &context);
+        report_error(FATAL, "No source file/s or is null.", &context);
         cleanup_and_exit(context, NULL, NULL);
         return EXIT_FAILURE;
     }

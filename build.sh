@@ -15,7 +15,9 @@ set -e
 # debug if no argument is given
 MODE=${1:-DEBUG}
 
-CC=cc
+# We are using gnu extensions so inorder to make it portable we will have to remove these
+# and switch to c17 eventually
+CC=gcc
 INCLUDE="-Iinclude/"
 COMMON_FLAGS="-Wall -Wextra -Wshadow -Wconversion -Wundef -Werror -pedantic -fanalyzer"
 SANITIZE="-fsanitize=address,undefined -fno-omit-frame-pointer"

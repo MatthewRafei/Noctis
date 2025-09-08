@@ -425,6 +425,7 @@ char *enum_lexer_status_to_str(enum Lexer_Status status)
             (void) fprintf(stderr, "Compiler bug happened in file: %s in function: %s.\n", __FILE__,
                            __func__);
             exit(EXIT_FAILURE);
+
     }
 
     return "Compiler bug happened in \"enum_lexer_status_to_str\" function. Please report it!\n";

@@ -155,7 +155,7 @@ void s_umap_print(struct S_Umap *map, void (*vp)(const void *))
 {
     size_t len = map->tbl.cap;
     printf("\n");
-    printf("The len of the hash table: %zu\n", map->tbl.len);
+    printf("The length of the hash table: %zu\n", map->tbl.len);
     printf("\n");
     for (size_t i = 0; i < len; i++) {
         if (map->tbl.nodes[i]) {
