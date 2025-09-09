@@ -247,35 +247,52 @@ struct Lexer lex_file(char *src, const char *fp, struct CompilerContext *context
         }
         // Multi-line comment
         else if (ch == '(' && SAFE_PEEK(src, i + 1, '*')) {
-            size_t counter = 0, r_counter = 0, c_counter = 0;
-            while (src[i + counter] && !(src[i + counter] == '*' && src[i + counter + 1] == ')')) {
+            size_t counter = 2; // start after "(*"
+            size_t r_counter = 0;       // rows advanced
+            size_t c_counter = 2;       // col advanced (we already consumed '(' and '*')
 
-                if (src[i + counter] == '\n' || src[i + counter] == '\r') {
+            while (src[i + counter]) {
+                char cc = src[i + counter];
+
+                // Check for closing "*)"
+                if (cc == '*' && SAFE_PEEK(src, i + counter + 1, ')')) {
+                    break;
+                }
+                // Track line/column
+                if (cc == '\n' || cc == '\r') {
                     r_counter += 1;
-                    c_counter = 0;
+                    c_counter = 0;      // reset column at start of new line
+                } else {
+                    c_counter += 1;
+                }
+
+                // Check for nested "(*"
+                if (cc == '(' && SAFE_PEEK(src, i + counter + 1, '*')) {
+                    context->source.line = line + r_counter;
+                    context->source.col = (r_counter == 0 ? col + c_counter : c_counter + 1);
+                    report_error(FATAL, "Nested multi-line comments are not supported.\n", context);
+                    lexer.status = LEXER_ERROR;
+                    break;
                 }
 
                 counter += 1;
-                c_counter += 1;
-
-                if (src[i + counter] == '(' && src[i + counter + 1] == '*') {
-                    context->source.line = line + r_counter;
-                    context->source.col = col + c_counter;
-                    report_error(FATAL, "Nested multi-line comments are not supported.\n", context);
-                    lexer.status = LEXER_ERROR;
-                }
             }
-            // What if string is not Buffer Null-Termination?
+
+            // Unterminated?
             if (!src[i + counter]) {
-                context->source.line = line + r_counter;
-                context->source.col = col + c_counter;
+                context->source.line = line;
+                context->source.col = col;
                 report_error(FATAL, "Unterminated multi-line comment.\n", context);
                 lexer.status = LEXER_ERROR;
+            } else {
+                // Skip closing "*)"
+                counter += 2;
             }
-            // 2 because we need to skip '*)'
-            i += counter + 2;
+
+            // Advance lexer state
+            i += counter;
             line += r_counter;
-            col = 1 + c_counter;
+            col = (r_counter == 0 ? col + c_counter : c_counter + 1);
         }
         // Single-line comment
         else if (ch == '-' && SAFE_PEEK(src, i + 1, '-')) {

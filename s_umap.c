@@ -24,7 +24,7 @@ TODO(malac0da):
 - Add unit tests for edge cases and resizing.
 */
 
-#define INITIAL_CAPACITY 1024
+#define INITIAL_CAPACITY 1024 // Play with the number until you get no collisions
 
 struct S_Umap s_umap_create(s_umap_hash hash, size_t nodev_stride, struct CompilerContext *context)
 {

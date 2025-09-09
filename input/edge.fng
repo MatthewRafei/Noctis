@@ -1,49 +1,50 @@
 -- Edge cases for lexer stress test
 
 -- import crazy.io;
--- import math.tomb;
+import math.tomb;
 
 -- Unclosed string
--- let name : string = "Noctis
+let name : string = "Noctis";
 
 -- Unclosed block
 (* func broken_func(a: int, b: string) -> int {
     let x : int = 10;
-    let y : float = 3.14; *)
+    let y : float = 3.14;
 
 -- Nested weird operators
--- let weird : int = 1 + 2 * 3 / 4 - 5 == 6 != 7 >= 8 <= 9 > 10 < 11 -> 12;
+let weird : int = 1 + 2 * 3 / 4 - 5 == 6 != 7 >= 8 <= 9 > 10 < 11 -> 12;
 
 -- Repeated dots
--- let dots : string = "...";
+let dots : string = "...";
 
 -- Escaped strings
--- let escape_test : string = "\" \\ \n \t \\\"";
+let escape_test : string = "\" \\ \n \t \\\"";
 
 -- Extremely long identifier
--- let this_is_a_really_long_identifier_name_that_should_stress_the_hash_table_and_memory_management_system_1234567890 : int = 42;
+let this_is_a_really_long_identifier_name_that_should_stress_the_hash_table_and_memory_management_system_1234567890 : int = 42;
 
 -- Lots of comments
-(* -- This is a long comment
-   -- with multiple lines
-   -- and strange symbols !@#$%^&*()_+{}|:"<>? []\; ',./
-   -- and it never ends properly 
+(* This is a long comment
+   with multiple lines
+   and strange symbols !@#$%^&*()_+{}|:"<>? []\; ',./
+   and it never ends properly 
 
 -- Call a function with weird parameters
--- func_call(123, "test", true, false, &mut var, a + b * c / d - e);
+func_call(123, "test", true, false, &mut var, a + b * c / d - e);
 
 -- All kinds of operators together
--- let crazy_ops : int = ! - + * / == != >= <= >> << := ~== & &mut;
+let crazy_ops : int = ! - + * / == != >= <= >> << := ~== & &mut;
 
 -- Nested parentheses
--- let nested : int = (((((1 + 2))))) * (((3 - 4)));
+let nested : int = (((((1 + 2))))) * (((3 - 4)));
 
 -- Empty blocks
--- func empty() -> unit {}
+func empty() -> unit {}
 
 -- Multiple statements without semicolons
--- let a : int = 1
--- let b : int = 2
+let a : int = 1
+let b : int = 2
 
+"sds
 -- Use of unknown symbol (should generate error)
--- let oops : int = @;
+let oops : int = @;
