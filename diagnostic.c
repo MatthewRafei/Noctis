@@ -56,10 +56,8 @@ struct DiagnosticArray *create_diagnostic_array(void)
 void report_error(const enum ErrorLevel level, const char *fmt, struct CompilerContext *context)
 {
     struct DiagnosticMessage message = create_message(level, fmt, context);
+    push_error(context->array, message);
 
-    push_error(context->array, message, context->array->len);
-
-    context->array->len += 1;
 }
 
 struct DiagnosticMessage create_message(const enum ErrorLevel level, const char *fmt,
@@ -76,30 +74,29 @@ struct DiagnosticMessage create_message(const enum ErrorLevel level, const char 
     return message;
 }
 
-
-void push_error(struct DiagnosticArray *array, struct DiagnosticMessage message,
-                const size_t number_of_errors)
+void push_error(struct DiagnosticArray *array, struct DiagnosticMessage message)
 {
-    //assert(number_of_errors < DYNARR_INITIAL_SIZE);
-    array->data[number_of_errors] = message;
+    if (array->len >= array->capacity) {
+        size_t new_capacity = array->capacity * 2;
+        struct DiagnosticMessage *new_array = (struct DiagnosticMessage *) realloc(array->data,
+                                                                                   new_capacity *
+                                                                                   sizeof(struct
+                                                                                          DiagnosticMessage));
+        if (!new_array) {
+            (void) fprintf(stderr, "Reallocating diagnostic array has failed.\n");
+            exit(1);
+        }
+        array->data = new_array;
+        array->capacity = new_capacity;
+    }
+
+    array->data[array->len++] = message;
 }
-
-
-/*
-struct DiagnosticMessage *double_diagnostic_array_size(struct DiagnosticMessage *message_array)
-{
-    struct DiagnosticMessage *new_array = realloc(message_array, (sizeof(message_array) * 2));
-    return new_array;
-}
-*/
-
 
 void free_diagnostic_array(struct DiagnosticArray *array)
 {
     free(array);
 }
-
-
 
 void print_diagnostic_messages(const struct DiagnosticArray *array, const size_t num_of_errors)
 {
@@ -110,7 +107,6 @@ void print_diagnostic_messages(const struct DiagnosticArray *array, const size_t
                        array->data[i].fmt);
     }
 }
-
 
 char *enum_error_to_str(enum ErrorLevel level)
 {

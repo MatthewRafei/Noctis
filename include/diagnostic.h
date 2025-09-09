@@ -36,10 +36,10 @@ void report_error(const enum ErrorLevel level, const char *fmt, struct CompilerC
 struct DiagnosticArray *inital_diagnostic_system(void);
 struct DiagnosticMessage create_message(const enum ErrorLevel level, const char *fmt,
                                         struct CompilerContext *context);
-void push_error(struct DiagnosticArray *array, struct DiagnosticMessage message,
-                const size_t number_of_errors);
+void push_error(struct DiagnosticArray *array, struct DiagnosticMessage message);
 struct DiagnosticArray *create_diagnostic_array(void);
 void free_diagnostic_array(struct DiagnosticArray *array);
 void print_diagnostic_messages(const struct DiagnosticArray *array, const size_t num_of_errors);
+
 
 #endif                          // DIAGNOSTIC_H
