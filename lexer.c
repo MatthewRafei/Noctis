@@ -18,6 +18,14 @@ TODO(malac0da):
 
 - Add more unit tests for edge cases (unterminated strings, comments, etc.).
 
+- Fix floating point detection logic, you can use below text for sample input to see logic errors
+1..2
+3...4
+5..  6
+
+- Fix ambiguous operator logic, use this evil operator prefix to find errors
+= == === ==== =>
+
 - Refactor error handling to avoid exit() calls; return error codes or use callbacks.
 - Handle nested multi-line comments or provide clearer error recovery.
 - Improve comments and error messages for maintainability.
@@ -96,7 +104,7 @@ struct S_Umap init_sym_keyword_tbl(struct CompilerContext *context)
     }
 
     // TODO(malac0da): Please move this to a debug or find a way to only run functions with
-    printf("\nThere are %zu symbols in the language\n", (sizeof(syms) / sizeof(*syms)));
+    printf("\nThere are %zu symbols in the language\n\n", (sizeof(syms) / sizeof(*syms)));
     for (size_t i = 0; i < (sizeof(syms) / sizeof(*syms)); i++) {
         printf("Symbol: %s -> Token: %d\n",
                syms[i], *(enum Token_Type *) s_umap_get(&tbl, syms[i]));
@@ -104,7 +112,7 @@ struct S_Umap init_sym_keyword_tbl(struct CompilerContext *context)
 
     printf("\n");
 
-    printf("\nThere are %zu keywords in the language\n", sizeof(kws) / sizeof(*kws));
+    printf("\nThere are %zu keywords in the language\n\n", sizeof(kws) / sizeof(*kws));
     for (size_t i = 0; i < sizeof(kws) / sizeof(*kws); i++) {
         printf("Keyword: %s -> Token: %d\n", kws[i], *(enum Token_Type *) s_umap_get(&tbl, kws[i]));
     }

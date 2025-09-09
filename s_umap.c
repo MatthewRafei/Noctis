@@ -24,7 +24,7 @@ TODO(malac0da):
 - Add unit tests for edge cases and resizing.
 */
 
-#define INITIAL_CAPACITY 1024 // Play with the number until you get no collisions
+#define INITIAL_CAPACITY 1024   // Play with the number until you get no collisions
 
 struct S_Umap s_umap_create(s_umap_hash hash, size_t nodev_stride, struct CompilerContext *context)
 {
@@ -154,12 +154,12 @@ void s_umap_print(struct S_Umap *map, void (*vp)(const void *))
 {
     size_t len = map->tbl.cap;
     printf("\n");
-    printf("The length of the hash table: %zu\n", map->tbl.len);
+    printf("The length of the keyword and symbol hash table: %zu\n", map->tbl.len);
     printf("\n");
     for (size_t i = 0; i < len; i++) {
         if (map->tbl.nodes[i]) {
             struct S_Umap_Node *tmp = map->tbl.nodes[i];
-            printf("Keys for nodes[%zu]: ", i);
+            printf("Keys for node[%zu]: ", i);
             while (tmp) {
                 printf("(\"%s\"", tmp->key);
                 if (vp) {
