@@ -14,7 +14,7 @@ char *file_to_str(const char *fp, struct CompilerContext *context)
         context->source.file = fp;
         context->source.line = 0;
         context->source.col = 0;
-        //report_error(INTERNAL, "Failed to open file.", context);
+        report_error(INTERNAL, "Failed to open file.", context);
         return NULL;
     }
 
@@ -22,7 +22,7 @@ char *file_to_str(const char *fp, struct CompilerContext *context)
         context->source.file = fp;
         context->source.line = 0;
         context->source.col = 0;
-        //report_error(INTERNAL, "Failed to seek file.", context);
+        report_error(INTERNAL, "Failed to seek file.", context);
         (void) fclose(file);
         return NULL;
     }
@@ -31,7 +31,7 @@ char *file_to_str(const char *fp, struct CompilerContext *context)
         context->source.file = fp;
         context->source.line = 0;
         context->source.col = 0;
-        //report_error(INTERNAL, "Failed to determine file length.", context);
+        report_error(INTERNAL, "Failed to determine file length.", context);
         (void) fclose(file);
         return NULL;
     }
@@ -43,25 +43,24 @@ char *file_to_str(const char *fp, struct CompilerContext *context)
         context->source.file = fp;
         context->source.line = 0;
         context->source.col = 0;
-        //report_error(INTERNAL, "Failed to determine file length.", context);
+        report_error(INTERNAL, "Failed to determine file length.", context);
         (void) fclose(file);
         return NULL;
     }
 
     (void) fseek(file, 0, SEEK_SET);
 
-    // No need to cast char* as malloc's return type
-    // is already void *
+    // No need to cast char* as malloc's return type is already void *
     char *buffer = malloc(length + 1);
     if (!buffer) {
-        perror("Failed to allocate memory");
+        report_error(INTERNAL, "Failed to allocate memory\n", context);
         (void) fclose(file);
         return NULL;
     }
     //Free buffer if fread fails
     size_t read_size = fread(buffer, 1, length, file);
     if (read_size != length) {
-        perror("Failed to read file");
+        report_error(INTERNAL, "Failed to read file!\n", context);
         free(buffer);
         (void) fclose(file);
         return NULL;
