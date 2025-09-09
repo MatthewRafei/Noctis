@@ -143,7 +143,7 @@ struct Token *token_alloc(enum Token_Type type,
 
     token->type = type;
     // Memory allocation error checks for strndup and s_malloc.
-    token->lexeme = strndup(lexeme, end);
+    token->lexeme = my_strndup(lexeme, end);
     token->fp = fp;
     token->row = row;
     token->col = col;

@@ -15,9 +15,9 @@ set -e
 # debug if no argument is given
 MODE=${1:-DEBUG}
 
-# We are using gnu extensions so inorder to make it portable we will have to remove these
-# and switch to c17 eventually
-CC=gcc
+# C99 and up
+# Modification have been made to make this code base as portable as possible
+CC=cc
 INCLUDE="-Iinclude/"
 COMMON_FLAGS="-Wall -Wextra -Wshadow -Wconversion -Wundef -Werror -pedantic -fanalyzer"
 SANITIZE="-fsanitize=address,undefined -fno-omit-frame-pointer"
@@ -27,9 +27,9 @@ OUT="noctis"
 
 if [ "$MODE" = "DEBUG" ]; then
     set -x
-    CFLAGS="$COMMON_FLAGS -std=gnu17 -g -O0 $SANITIZE"
+    CFLAGS="$COMMON_FLAGS -std=c17 -g -O0 $SANITIZE"
 elif [ "$MODE" = "RELEASE" ]; then
-    CFLAGS="$COMMON_FLAGS -std=gnu17 -O2"
+    CFLAGS="$COMMON_FLAGS -std=c17 -O2"
 else
     echo "Unknown mode: $MODE"
     exit 1

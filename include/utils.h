@@ -10,5 +10,9 @@
 #define SAFE_PEEK(arr, i, el) ((arr)[(i)] && (arr)[(i)] == (el))
 
 void *s_malloc(size_t bytes);
+char *my_strdup(const char *s);
+char *my_strndup(const char *s, size_t n);
+size_t my_strnlen(const char *s, size_t maxlen);
+
 
 #endif                          // UTILS_H

@@ -52,7 +52,7 @@ struct S_Umap_Node *s_umap_node_create(const char *key, const void *value, size_
     struct S_Umap_Node *node = (struct S_Umap_Node *) s_malloc(sizeof(struct S_Umap_Node));
     node->next = NULL;
 
-    node->key = strdup(key);
+    node->key = my_strdup(key);
 
     node->value = s_malloc(nodev_stride);
     (void) memcpy((uint32_t *) node->value, (uint32_t *) value, nodev_stride);

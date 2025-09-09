@@ -55,7 +55,7 @@ struct S_Umap init_sym_keyword_tbl(struct CompilerContext *context)
     struct S_Umap tbl = s_umap_create(fnv1a, sizeof(enum Token_Type), context);
 
     if (!tbl.tbl.nodes) {
-        //report_error(FATAL, "Failed to create symbol/keyword table in lexer.\n", context);
+        report_error(FATAL, "Failed to create symbol/keyword table in lexer.\n", context);
         return (struct S_Umap) { 0 };
     }
 
@@ -88,8 +88,7 @@ struct S_Umap init_sym_keyword_tbl(struct CompilerContext *context)
 
     // If this fails its probably because you removed something in either keywords.h, token.h, or token.c
     // And did not make that change across all those three files
-    static_assert(sizeof(kws) / sizeof(*kws) == (TOKEN_KEYWORD_LEN - TOKEN_SYMBOL_LEN) - 1,
-                  "Keyword table size mismatch");
+    assert(sizeof(kws) / sizeof(*kws) == (TOKEN_KEYWORD_LEN - TOKEN_SYMBOL_LEN) - 1);
 
     for (size_t i = 0; i < sizeof(kws) / sizeof(*kws); ++i) {
         /*
@@ -192,7 +191,7 @@ enum Token_Type *determine_symbol(const char *s,
 {
     *actual_len = 0;
 
-    // Fix this with dynamically allocated 
+    // TODO(malac0da): Fix this with dynamically allocated 
     char buf[256] = { 0 };
 
     if (op_len < sizeof(buf)) {
