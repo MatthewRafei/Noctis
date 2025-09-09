@@ -261,7 +261,8 @@ struct Lexer lex_file(char *src, const char *fp, struct CompilerContext *context
                 if (src[i + counter] == '(' && src[i + counter + 1] == '*') {
                     context->source.line = line + r_counter;
                     context->source.col = col + c_counter;
-                    report_error(ERROR, "Nested multi-line comments are not supported.\n", context);
+                    report_error(FATAL, "Nested multi-line comments are not supported.\n", context);
+                    lexer.status = LEXER_ERROR;
                 }
             }
             // What if string is not Buffer Null-Termination?

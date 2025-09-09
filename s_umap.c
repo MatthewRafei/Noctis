@@ -29,8 +29,7 @@ TODO(malac0da):
 struct S_Umap s_umap_create(s_umap_hash hash, size_t nodev_stride, struct CompilerContext *context)
 {
     if (!hash) {
-        (void) context;
-        //report_error(INTERNAL, "s_umap_create: NULL hash function provided.\n", context);
+        report_error(INTERNAL, "s_umap_create: NULL hash function provided.\n", context);
         return (struct S_Umap) { 0 };
     }
 
