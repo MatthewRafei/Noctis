@@ -26,16 +26,11 @@ TODO(malac0da):
 - Fix ambiguous operator logic, use this evil operator prefix to find errors
 = == === ==== =>
 
-- Refactor error handling to avoid exit() calls; return error codes or use callbacks.
-- Handle nested multi-line comments or provide clearer error recovery.
-- Improve comments and error messages for maintainability.
-
 - Support escape sequences in string and character literals.
 - Make character literals distinct from string literals.
 
 - Benchmark and possibly replace consume_while with strspn for performance.
 - Consider dynamic allocation for buffers (e.g., in determine_symbol).
-- Improve predicate logic for operators (not_sym may miss cases).
 */
 /*
 - Common escape sequences to support:
@@ -217,15 +212,14 @@ int not_quote(int c)
     return c != '"' && c != '\'';
 }
 
-struct Lexer lex_file(char *src, const char *fp, struct CompilerContext *context,
-                      enum Lexer_Status status)
+struct Lexer lex_file(char *src, const char *fp, struct CompilerContext *context)
 {
     struct Lexer lexer = (struct Lexer) {
         .hd = NULL,
         .tl = NULL,
     };
 
-    lexer.status = status;
+    lexer.status = LEXER_OK;
 
     context->source.file = fp;
 
@@ -397,6 +391,8 @@ struct Lexer lex_file(char *src, const char *fp, struct CompilerContext *context
             col += 2;
         }
         // Operators
+        // this code makes a lot of assumptions about people being smart.
+        // TODO(malac0da): Fix this code so that ambiguous operator logic doesnt occur
         else {
             size_t op_len = consume_while(src + i, not_sym);
             size_t len = 0;
@@ -450,7 +446,6 @@ char *enum_lexer_status_to_str(enum Lexer_Status status)
             (void) fprintf(stderr, "Compiler bug happened in file: %s in function: %s.\n", __FILE__,
                            __func__);
             exit(EXIT_FAILURE);
-
     }
 
     return "Compiler bug happened in \"enum_lexer_status_to_str\" function. Please report it!\n";

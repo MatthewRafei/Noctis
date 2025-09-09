@@ -16,8 +16,7 @@ struct Lexer {
 };
 
 struct S_Umap init_sym_keyword_tbl(struct CompilerContext *context);
-struct Lexer lex_file(char *src, const char *fp, struct CompilerContext *context,
-                      enum Lexer_Status status);
+struct Lexer lex_file(char *src, const char *fp, struct CompilerContext *context);
 void lexer_dump(const struct Lexer *l);
 void lexer_free(struct Lexer *l);
 char *enum_lexer_status_to_str(enum Lexer_Status status);

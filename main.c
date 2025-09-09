@@ -71,7 +71,7 @@ int main(int argc, const char *argv[])
     }
     // Lexer
     modify_compiler_context_stage(&context, LEXING);
-    struct Lexer lexer = lex_file(src, fp, &context, LEXER_OK);
+    struct Lexer lexer = lex_file(src, fp, &context);
 
     if (lexer.status == LEXER_ERROR) {  // ERROR and FATAL cause program to exit with failure
         cleanup_and_exit(context, src, &lexer);
