@@ -5,6 +5,12 @@
 #include <stdlib.h>
 #include <string.h>
 
+/*
+    Consider adding calling functions name
+    as a parameter so we can track which function
+    failed to allocate memory?
+
+*/
 void *s_malloc(size_t bytes)
 {
     void *p = malloc(bytes);
@@ -19,9 +25,8 @@ void *s_malloc(size_t bytes)
 char *my_strdup(const char *s)
 {
     size_t len = strlen(s) + 1;
-    char *p = malloc(len);
-    if (p)
-        memcpy(p, s, len);
+    char *p = s_malloc(len);
+    memcpy(p, s, len);
     return p;
 }
 
@@ -35,9 +40,7 @@ size_t my_strnlen(const char *s, size_t maxlen)
 char *my_strndup(const char *s, size_t n)
 {
     size_t len = my_strnlen(s, n);
-    char *p = malloc(len + 1);
-    if (!p)
-        return NULL;
+    char *p = s_malloc(len + 1);
     memcpy(p, s, len);
     p[len] = '\0';
     return p;
