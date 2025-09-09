@@ -1,103 +1,91 @@
+#include "context.h"
+#include "diagnostic.h"
+#include "io.h"
+#include "lexer.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "lexer.h"
-
 /*
-TODO:
+TODO(malac0da):
 - Refactor error handling for consistency (prefer returning error codes or using EXIT_FAILURE).
-- Fix typos and use more formal comments.
-- CHECK: Check ftell(file) for < 0 before casting to size_t.
-- Use fprintf(stderr, ...) for error output.
-- Consider future multi-file support in argument parsing.
 
 - Implement multi-file support
-
 */
 
-char *file_to_str(const char *fp)
+void print_ascii_logo(void)
 {
-  FILE *file = fopen(fp, "rb");
+    const char *logo[] = {
+        "                                                              ",
+        "███▄▄▄▄    ▄██████▄   ▄████████     ███      ▄█     ▄████████",
+        "███▀▀▀██▄ ███    ███ ███    ███ ▀█████████▄ ███    ███    ███",
+        "███   ███ ███    ███ ███    █▀     ▀███▀▀██ ███▌   ███    █▀",
+        "███   ███ ███    ███ ███            ███   ▀ ███▌   ███        ",
+        "███   ███ ███    ███ ███            ███     ███▌ ▀███████████",
+        "███   ███ ███    ███ ███    █▄      ███     ███           ███",
+        "███   ███ ███    ███ ███    ███     ███     ███     ▄█    ███",
+        " ▀█   █▀   ▀██████▀  ████████▀     ▄████▀   █▀    ▄████████▀",
+        "                                                              "
+    };
 
-  if (!file) {
-    perror("Failed to open file");
-    exit(1);
-  }
-
-  if (fseek(file, 0, SEEK_END) != 0){
-    perror("Failed to seek file");
-    fclose(file);
-    return NULL;
-  }
-
-  if (ftell(file) < 0) {
-    perror("Failed to determine file length");
-    fclose(file);
-    return NULL;
-  }
-
-  size_t length = (size_t)ftell(file);
-
-  // Some file-systems might return -1
-  if(length == (size_t)-1){
-    printf("Failed to determine file length\n");
-    fclose(file);
-    return NULL;
-  }
-
-  rewind(file);
-
-  // No need to cast char* as malloc's return type
-  // is already void *
-  char *buffer = malloc(length + 1);
-  if (!buffer) {
-    perror("Failed to allocate memory");
-    fclose(file);
-    return NULL;
-  }
-
-  //Free buffer if fread fails
-  size_t read_size = fread(buffer, 1, length, file);
-  if(read_size != (size_t)length){
-    perror("Failed to read file");
-    free(buffer);
-    fclose(file);
-    return NULL;
-  }
-
-  buffer[length] = '\0';
-  fclose(file);
-  return buffer;
+    size_t lines = sizeof(logo) / sizeof(logo[0]);
+    for (size_t i = 0; i < lines; i++) {
+        printf("%s\n", logo[i]);
+    }
 }
 
-int help(void)
+void cleanup_and_exit(struct CompilerContext context, char *src, struct Lexer *lexer)
 {
-  printf("Usage: noctis <filepath>\n");
-  //return 1;
-  exit(1);
+    print_diagnostic_messages(context.array, context.array->len);
+    free(context.array->data);
+    free_diagnostic_array(context.array);
+    if (lexer) {
+        lexer_free(lexer);
+    }
+    if (src) {
+        free(src);
+    }
 }
 
-int main(int argc, char *argv[])
+int main(int argc, const char *argv[])
 {
-  if (argc < 2) {
-    help();
-  }
+    // All fun and games
+    print_ascii_logo();
 
-  const char *fp = argv[1];
-  char *src = file_to_str(fp);
+    struct CompilerContext context = create_compiler_context(MAIN);
 
-  // check source before calling lex_file
-  if(!src){
-    // Maybe replace with better error handling
-    return 1; // Exit gracefully, you OG
-  }
+    if (argc < 2) {
+        report_error(FATAL, "No file arguments - Usage: ./noctis <filepath>", &context);
+        cleanup_and_exit(context, NULL, NULL);
+        return EXIT_FAILURE;
+    }
 
-  // Lexer
-  struct Lexer lexer = lex_file(src, fp);
-  lexer_dump(&lexer);
-  printf("\nWhat is lexer size: %ld\n", lexer.size);
+    const char *fp = argv[1];
+    char *src = file_to_str(fp, &context);
 
-  lexer_free(&lexer);
-  free(src);
-  return 0;
+    // check source before calling lex_file
+    if (!src) {
+        report_error(FATAL, "No source file/s or is null.", &context);
+        cleanup_and_exit(context, NULL, NULL);
+        return EXIT_FAILURE;
+    }
+    // Lexer
+    modify_compiler_context_stage(&context, LEXING);
+    struct Lexer lexer = lex_file(src, fp, &context, LEXER_OK);
+
+    if (lexer.status == LEXER_ERROR) {  // ERROR and FATAL cause program to exit with failure
+        cleanup_and_exit(context, src, &lexer);
+        return EXIT_FAILURE;
+    } else if (context.array->len > 0) {        // Non-fatal errors, continue but print errors
+        cleanup_and_exit(context, src, &lexer);
+        return EXIT_FAILURE;
+    } else {                    // no errors, continue as normal
+        printf("\nLexer size: %zu\n\n", lexer.size);
+        lexer_dump(&lexer);
+        cleanup_and_exit(context, src, &lexer);
+    }
+
+    printf("Lexer Status: %s\n", enum_lexer_status_to_str(lexer.status));
+
+    return EXIT_SUCCESS;
 }

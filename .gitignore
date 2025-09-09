@@ -1,1 +1,9 @@
 noctis
+.vscode
+.indent_backup
+*.plist
+*.o
+*.dSYM
+*.so
+*.a
+*.out

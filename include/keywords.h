@@ -25,7 +25,7 @@
 // Keyword as compound literal 
 // We can make an array of keywords
 // Dont forget a comma. It will fail the assert
-#define KEYWORD_ASCPL {				\
+#define KEYWORD_ASCPL {			\
     KEYWORD_IF,					\
     KEYWORD_THEN,				\
     KEYWORD_ELSE,				\
@@ -48,4 +48,4 @@
     KEYWORD_MUT, 				\
 }
 
-#endif // KEYWORDS_H
+#endif                          // KEYWORDS_H
