@@ -212,6 +212,146 @@ int not_quote(int c)
     return c != '"' && c != '\'';
 }
 
+void lex_whitespace(struct Lexer_Pos *lexer_pos)
+{
+    lexer_pos->index += 1;
+    lexer_pos->col += 1;
+}
+
+void lex_newline(struct Lexer_Pos *lexer_pos)
+{
+    lexer_pos->index += 1;
+    lexer_pos->line += 1;
+    lexer_pos->col = 1;
+}
+
+void lex_singleline_comment(struct Lexer_Pos *lexer_pos, char *src)
+{
+    size_t len = consume_while(src + lexer_pos->index, not_newline);
+    lexer_pos->index += len;
+    lexer_pos->col = 1;
+}
+
+void lex_multiline_comment(struct Lexer_Pos *lexer_pos, const char *src,
+                           struct CompilerContext *context, struct Lexer *lexer)
+{
+    size_t counter = 2;         // start after "(*"
+    size_t r_counter = 0;
+    size_t c_counter = 2;       // column advanced we already consumed '(' and '*'
+
+    while (src[lexer_pos->index + counter]) {
+        char current_character = src[lexer_pos->index + counter];
+
+        //chcek for closing "*)"
+        if (current_character == '*' && SAFE_PEEK(src, lexer_pos->index + counter + 1, ')')) {
+            break;
+        }
+
+        if (current_character == '\n' || current_character == '\r') {
+            r_counter += 1;
+            c_counter = 0;
+        } else {
+            c_counter += 1;
+        }
+
+        if (current_character == '(' && SAFE_PEEK(src, lexer_pos->index + counter + 1, '*')) {
+            context->source.line = lexer_pos->line + r_counter;
+            context->source.col = (r_counter == 0 ? lexer_pos->col + c_counter : c_counter + 1);
+            report_error(FATAL, "Nested multi-line comments are not supported.\n", context);
+            lexer->status = LEXER_ERROR;
+            break;
+        }
+
+        counter += 1;
+    }
+
+    if (!src[lexer_pos->index + counter]) {
+        context->source.line = lexer_pos->line;
+        context->source.col = lexer_pos->col;
+        report_error(FATAL, "Unterminated multi-line comment.\n", context);
+        lexer->status = LEXER_ERROR;
+    } else {
+        // Skip closing "*)"
+        counter += 2;
+    }
+
+    lexer_pos->index += counter;
+    lexer_pos->line += r_counter;
+    lexer_pos->col = (r_counter == 0 ? lexer_pos->col + c_counter : c_counter + 1);
+}
+
+void lex_id_keywords(struct Lexer_Pos *lexer_pos, char *src, const struct S_Umap *sym_keyword_tbl,
+                     const char *fp, struct Lexer *lexer)
+{
+    size_t len = consume_while(src + lexer_pos->index, is_identifier);
+
+    char *substring = s_malloc(len + 1);
+    memcpy(substring, src + lexer_pos->index, len);
+    substring[len] = '\0';
+
+    const enum Token_Type *type = (enum Token_Type *) s_umap_get(sym_keyword_tbl, substring);
+
+    if (type != NULL) {
+        struct Token *tok =
+            token_alloc(*type, src + lexer_pos->index, len, fp, lexer_pos->line, lexer_pos->col);
+        lexer_append(lexer, tok);
+    } else {
+        struct Token *tok =
+            token_alloc(TOKEN_IDENTIFIER, src + lexer_pos->index, len, fp, lexer_pos->line,
+                        lexer_pos->col);
+        lexer_append(lexer, tok);
+    }
+
+    lexer_pos->index += len;
+    lexer_pos->col += len;
+
+    free(substring);
+}
+
+struct Lexer lex_file(char *src, const char *fp, struct CompilerContext *context)
+{
+    struct Lexer lexer = (struct Lexer) {.hd = NULL,.tl = NULL, };
+
+    lexer.status = LEXER_OK;
+    context->source.file = fp;
+    struct S_Umap sym_keyword_tbl = init_sym_keyword_tbl(context);
+
+    if (!sym_keyword_tbl.tbl.nodes) {
+        report_error(FATAL, "Failed to create symbol/keyword table in lexer.\n", context);
+        s_umap_free(&sym_keyword_tbl);
+        lexer.status = LEXER_ERROR;
+        return lexer;
+    }
+
+    struct Lexer_Pos lexer_pos = (struct Lexer_Pos) {.index = 0,.line = 1,.col = 1 };
+
+    while (src[lexer_pos.index] != '\0') {
+        char current_char = src[lexer_pos.index];
+
+        if (isspace(current_char)) {    // Whitespace (check tabs later)
+            lex_whitespace(&lexer_pos);
+        } else if (current_char == '\n' || current_char == '\r') {      // Newline
+            lex_newline(&lexer_pos);
+        } else if (current_char == '(' && SAFE_PEEK(src, lexer_pos.index + 1, '*')) {   // Multi-line comment
+            lex_multiline_comment(&lexer_pos, src, context, &lexer);
+        } else if (current_char == '-' && SAFE_PEEK(src, lexer_pos.index + 1, '-')) {   // Single-line comment
+            lex_singleline_comment(&lexer_pos, src);
+        } else if (isalpha(current_char) || current_char == '_') {      // Identifiers and keywords
+            lex_id_keywords(&lexer_pos, src, &sym_keyword_tbl, fp, &lexer);
+        }
+
+    }
+
+
+    s_umap_print(&sym_keyword_tbl, NULL);
+    s_umap_free(&sym_keyword_tbl);
+    return lexer;
+
+
+}
+
+
+/*
 struct Lexer lex_file(char *src, const char *fp, struct CompilerContext *context)
 {
     struct Lexer lexer = (struct Lexer) {
@@ -236,99 +376,8 @@ struct Lexer lex_file(char *src, const char *fp, struct CompilerContext *context
     while (src[i] != '\0') {
         char ch = src[i];
 
-        // Skip whitespace and tabs
-        if (ch == ' ' || ch == '\t') {
-            i += 1, col += 1;
-        }
-        // Skip newline and carriage return
-        else if (ch == '\n' || ch == '\r') {
-            i += 1;
-            line += 1;
-            col = 1;
-        }
-        // Multi-line comment
-        else if (ch == '(' && SAFE_PEEK(src, i + 1, '*')) {
-            size_t counter = 2; // start after "(*"
-            size_t r_counter = 0;       // rows advanced
-            size_t c_counter = 2;       // col advanced (we already consumed '(' and '*')
 
-            while (src[i + counter]) {
-                char cc = src[i + counter];
-
-                // Check for closing "*)"
-                if (cc == '*' && SAFE_PEEK(src, i + counter + 1, ')')) {
-                    break;
-                }
-                // Track line/column
-                if (cc == '\n' || cc == '\r') {
-                    r_counter += 1;
-                    c_counter = 0;      // reset column at start of new line
-                } else {
-                    c_counter += 1;
-                }
-
-                // Check for nested "(*"
-                if (cc == '(' && SAFE_PEEK(src, i + counter + 1, '*')) {
-                    context->source.line = line + r_counter;
-                    context->source.col = (r_counter == 0 ? col + c_counter : c_counter + 1);
-                    report_error(FATAL, "Nested multi-line comments are not supported.\n", context);
-                    lexer.status = LEXER_ERROR;
-                    break;
-                }
-
-                counter += 1;
-            }
-
-            // Unterminated?
-            if (!src[i + counter]) {
-                context->source.line = line;
-                context->source.col = col;
-                report_error(FATAL, "Unterminated multi-line comment.\n", context);
-                lexer.status = LEXER_ERROR;
-            } else {
-                // Skip closing "*)"
-                counter += 2;
-            }
-
-            // Advance lexer state
-            i += counter;
-            line += r_counter;
-            col = (r_counter == 0 ? col + c_counter : c_counter + 1);
-        }
-        // Single-line comment
-        else if (ch == '-' && SAFE_PEEK(src, i + 1, '-')) {
-            size_t len = consume_while(src + i, not_newline);
-            // No need to update to line
-            // because skip newline will take care of it
-            i += len;
-            col = 1;
-        }
-        // Identifiers and keywords
-        else if (isalpha(ch) || ch == '_') {
-            size_t len = consume_while(src + i, is_identifier);
-
-            // Use len to create a substring to search
-            // for keywords in the hash table
-            // char substring[len + 1];
-            char *substring = s_malloc(len + 1);
-            memcpy(substring, src + i, len);
-            substring[len] = '\0';
-
-            const enum Token_Type *type =
-                (enum Token_Type *) s_umap_get(&sym_keyword_tbl, substring);
-
-            if (type != NULL) {
-                struct Token *t = token_alloc(*type, src + i, len, fp, line, col);
-                lexer_append(&lexer, t);
-                i += len, col += len;
-            } else {
-                struct Token *t = token_alloc(TOKEN_IDENTIFIER, src + i, len, fp, line, col);
-                lexer_append(&lexer, t);
-                i += len, col += len;
-            }
-
-            free(substring);
-        }
+        // Strings
         // TODO(malac0da): Make it so that character literals are their own thing.
         // TODO(malac0da): Escape sequences
         else if (ch == '"' || ch == '\'') {
@@ -357,6 +406,8 @@ struct Lexer lex_file(char *src, const char *fp, struct CompilerContext *context
             i += len + 1;
             col += len + 1;
         }
+
+
         // Numbers
         else if (isdigit(ch)) {
             size_t len = consume_while(src + i, isdigit);
@@ -390,6 +441,9 @@ struct Lexer lex_file(char *src, const char *fp, struct CompilerContext *context
             i += len;
             col += 2;
         }
+
+
+
         // Operators
         // this code makes a lot of assumptions about people being smart.
         // TODO(malac0da): Fix this code so that ambiguous operator logic doesnt occur
@@ -418,6 +472,7 @@ struct Lexer lex_file(char *src, const char *fp, struct CompilerContext *context
     s_umap_free(&sym_keyword_tbl);
     return lexer;
 }
+*/
 
 void lexer_free(struct Lexer *l)
 {

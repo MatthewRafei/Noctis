@@ -15,6 +15,12 @@ struct Lexer {
     enum Lexer_Status status;
 };
 
+struct Lexer_Pos {
+    size_t index;
+    size_t line;
+    size_t col;
+};
+
 struct S_Umap init_sym_keyword_tbl(struct CompilerContext *context);
 struct Lexer lex_file(char *src, const char *fp, struct CompilerContext *context);
 void lexer_dump(const struct Lexer *l);
