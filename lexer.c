@@ -18,14 +18,6 @@ TODO(malac0da):
 
 - Add more unit tests for edge cases (unterminated strings, comments, etc.).
 
-- Fix floating point detection logic, you can use below text for sample input to see logic errors
-1..2
-3...4
-5..  6
-
-- Fix ambiguous operator logic, use this evil operator prefix to find errors
-= == === ==== =>
-
 - Support escape sequences in string and character literals.
 - Make character literals distinct from string literals.
 
@@ -54,7 +46,7 @@ struct S_Umap init_sym_keyword_tbl(struct CompilerContext *context)
         return (struct S_Umap) { 0 };
     }
 
-    char *syms[] = {
+    const char *syms[] = {
         "(", ")",               // TOKEN_LPAREN, TOKEN_RPAREN
         "{", "}",               // TOKEN_LCURLY, TOKEN_RCURLY
         "[", "]",               // TOKEN_LSQUAR, TOKEN_RSQUAR
@@ -97,24 +89,15 @@ struct S_Umap init_sym_keyword_tbl(struct CompilerContext *context)
         s_umap_insert(&tbl, kws[i], (void *) &token);
     }
 
-    // TODO(malac0da): Please move this to a debug or find a way to only run functions with
-    printf("\nThere are %zu symbols in the language\n\n", (sizeof(syms) / sizeof(*syms)));
-    for (size_t i = 0; i < (sizeof(syms) / sizeof(*syms)); i++) {
-        printf("Symbol: %s -> Token: %d\n",
-               syms[i], *(enum Token_Type *) s_umap_get(&tbl, syms[i]));
-    }
-
-    printf("\n");
-
-    printf("\nThere are %zu keywords in the language\n\n", sizeof(kws) / sizeof(*kws));
-    for (size_t i = 0; i < sizeof(kws) / sizeof(*kws); i++) {
-        printf("Keyword: %s -> Token: %d\n", kws[i], *(enum Token_Type *) s_umap_get(&tbl, kws[i]));
-    }
-
+    //print_keywords_and_symbols(syms, &tbl, kws);
+    print_keywords_and_symbols(syms);
     return tbl;
 }
 
-//void print_keywords_and_symbols(char &syms,  )
+void print_keywords_and_symbols(const char *syms[])
+{
+    printf("Size of syms %zu", sizeof(*syms));
+}
 
 static void lexer_append(struct Lexer *l, struct Token *t)
 {
@@ -129,7 +112,7 @@ static void lexer_append(struct Lexer *l, struct Token *t)
 
 void lexer_dump(const struct Lexer *l)
 {
-    struct Token *node = l->hd;
+    const struct Token *node = l->hd;
     while (node) {
         token_dump(node);
         node = node->next;
@@ -325,7 +308,6 @@ void lex_strings(struct Lexer_Pos *lexer_pos, char *src, struct CompilerContext 
         context->source.col = lexer_pos->col - 1;       // Adjust column to point to opening quote
         report_error(FATAL, "Unterminated string literal.\n", context);
         lexer->status = LEXER_ERROR;
-        //return lexer; // Should reconsider how errors are handled maybe...
         return;
     }
 
@@ -343,6 +325,8 @@ void lex_strings(struct Lexer_Pos *lexer_pos, char *src, struct CompilerContext 
 void lex_numbers(struct Lexer_Pos *lexer_pos, char *src, const char *fp, struct Lexer *lexer)
 {
     size_t len = consume_while(src + lexer_pos->index, isdigit);
+
+    printf("\nWhat is Lexer pos row: %zu\n", lexer_pos->line);
 
     // We found a decimal point followed by a digit, a float.
     if (SAFE_PEEK(src, lexer_pos->index + len, '.')
@@ -437,7 +421,7 @@ struct Lexer lex_file(char *src, const char *fp, struct CompilerContext *context
     while (src[lexer_pos.index] != '\0') {
         char current_char = src[lexer_pos.index];
 
-        if (isspace(current_char)) {    // Whitespace (check tabs later)
+        if (isblank(current_char)) {    // Whitespace (check tabs later?)
             lex_whitespace(&lexer_pos);
         } else if (current_char == '\n' || current_char == '\r') {      // Newline
             lex_newline(&lexer_pos);
@@ -458,7 +442,6 @@ struct Lexer lex_file(char *src, const char *fp, struct CompilerContext *context
         } else {
             lex_operators(&lexer_pos, src, &sym_keyword_tbl, context, &lexer, fp);
         }
-
     }
 
     s_umap_print(&sym_keyword_tbl, NULL);
