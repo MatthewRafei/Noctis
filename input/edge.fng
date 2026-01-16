@@ -1,24 +1,26 @@
 -- Edge cases for lexer stress test
 
 -- import crazy.io;
-import math.tomb;
+-- import math.tomb;
 
 -- Unclosed string
-let name : string = "Noctis";
+-- let name : string = "Noctis";
 
 -- Unclosed block
-(* func broken_func(a: int, b: string) -> int {
-    let x : int = 10;
-    let y : float = 3.14;
+-- (* func broken_func(a: int, b: string) -> int {
+--    let x : int = 10;
+--    let y : float = 3.14;
 
 -- Nested weird operators
-let weird : int = 1 + 2 * 3 / 4 - 5 == 6 != 7 >= 8 <= 9 > 10 < 11 -> 12;
+-- let weird : int = 1 + 2 * 3 / 4 - 5 == 6 != 7 >= 8 <= 9 > 10 < 11 -> 12;
 
 -- Repeated dots
-let dots : string = "...";
+-- let dots : string = "...";
 
 -- Escaped strings
-let escape_test : string = "\" \\ \n \t \\\"";
+-- let escape_test : string = "\" \\ \n \t \\\"";
+
+sd
 
 -- Extremely long identifier
 let this_is_a_really_long_identifier_name_that_should_stress_the_hash_table_and_memory_management_system_1234567890 : int = 42;

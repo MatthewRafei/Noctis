@@ -2,8 +2,7 @@
 
 # This script is a “do-your-best” guardrail.
 
-# Dependencies: gcc, cppcheck (optional)
-# Gnu extensions are currently being used
+# Dependencies: gcc, cppcheck (optional), indent (optional)
 
 # TODO(malac0da): Learn how to implement unit tests and fuzzers into the build process
 
