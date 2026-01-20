@@ -1,0 +1,10 @@
+let normal = 1;
+let _leading_underscore = 2;
+let trailing_ = 3;
+let __double__ = 4;
+let camelCase123 = 5;
+let πτσ = 6;           -- unicode (test if allowed)
+let 123start = 7;      -- invalid number prefix
+let $dollar = 8;       -- probably invalid
+let `backticks` = 9;   -- raw identifier test
+let let_mut_export = 10;

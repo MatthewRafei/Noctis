@@ -398,6 +398,12 @@ void lex_operators(struct Lexer_Pos *lexer_pos, char *src, struct S_Umap *sym_ke
     lexer_pos->col += len;
 }
 
+void lex_at(struct Lexer_Pos *lexer_pos)
+{
+    lexer_pos->index += 1;
+    lexer_pos->col += 1;
+}
+
 // Rewrote lexer into many different funtions 
 // TODO(malac0da): edge.fng triggers a bug
 // TODO(malac0da): row and column tracking is now broken
@@ -439,6 +445,9 @@ struct Lexer lex_file(char *src, const char *fp, struct CompilerContext *context
             lex_arrow(&lexer_pos, src, fp, &lexer);
         } else if (current_char == '.' && src[lexer_pos.index + 1] && isdigit(src[lexer_pos.index + 1])) {      // Floats that start with a dot
             lex_float(&lexer_pos, src, fp, &lexer);
+            // @ symbol causes use after free issues in lexer?
+        } else if (current_char == '@') {
+            lex_at(&lexer_pos);
         } else {
             lex_operators(&lexer_pos, src, &sym_keyword_tbl, context, &lexer, fp);
         }

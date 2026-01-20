@@ -1,0 +1,8 @@
+let x = a + + b;
+let y = a++ + ++b;     -- if postfix/prefix exist
+let z = &mut&&&s;
+let r = & & mut s;
+let t = -> => ==> === >= <= == !=
+let u = .. ... .... ..=;
+let v = 1..2;
+let w = 1...10;
