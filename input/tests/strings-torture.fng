@@ -1,0 +1,12 @@
+let s1 = "";
+let s2 = "unclosed";
+let s3 = "escaped \"quote\" and \\ backslash";
+let s4 = "multi
+line
+literal";
+let s5 = "bad escape \xZZ here";
+let s6 = "good escapes \n\t\r\"\\";
+let s7 = "trailing backslash \
+continued line?";
+let s8 = "end with backslash \
+";

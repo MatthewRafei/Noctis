@@ -1,0 +1,8 @@
+(* outer comment starts
+  (* nested comment *)
+  still inside outer
+  (* another nested but not closed
+  more text
+-- normal single line inside multi
+*)
+outside? no still inside

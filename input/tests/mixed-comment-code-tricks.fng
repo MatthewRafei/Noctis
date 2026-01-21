@@ -1,0 +1,9 @@
+func f(){}--no-space comment
+
+func g()--comment right after ()
+{
+}
+
+let x = 1(* inline (* nested *) comment *) + 2;
+
+-- comment ends file without newline

@@ -1,0 +1,15 @@
+let a = 0;
+let b = 000042;
+let c = 1_000_000;
+let d = 1__000;        -- double underscore
+let e = 123.;
+let f = .456;
+let g = 1.2.3;
+let h = 0xFF_AA;
+let i = 0b1010_1101;
+let j = 0o755;
+let k = 1e6;
+let l = 1.2e-4;
+let m = 1.e-4;
+let n = 1.2E+05;
+let o = 1_.2e3_;       -- mixed underscores

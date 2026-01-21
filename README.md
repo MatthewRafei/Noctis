@@ -18,7 +18,7 @@ Noctis emphasizes **clarity, ownership, and explicitness**, avoiding hidden comp
 ## Roadmap
 - [X] Language Specification
 - [X] Lexer
-- [ ] Error Handling
+- [X] Error Handling
 - [ ] Parser
 - [ ] Semantic Analysis
 - [ ] Intermediate Representation
