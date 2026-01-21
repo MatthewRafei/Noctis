@@ -355,7 +355,6 @@ void lex_numbers(struct Lexer_Pos *lexer_pos, char *src, const char *fp, struct 
     }
 }
 
-// This feels hacky
 void lex_arrow(struct Lexer_Pos *lexer_pos, const char *src, const char *fp, struct Lexer *lexer)
 {
     struct Token *tok =
@@ -366,15 +365,15 @@ void lex_arrow(struct Lexer_Pos *lexer_pos, const char *src, const char *fp, str
     lexer_pos->col += TWO_CHARACTERS;
 }
 
-// This feels hacky
 void lex_float(struct Lexer_Pos *lexer_pos, char *src, const char *fp, struct Lexer *lexer)
 {
     size_t len = consume_while(src + lexer_pos->index + ONE_CHARACTER, isdigit);
     struct Token *tok =
-        token_alloc(TOKEN_FLOAT_LIT, src + lexer_pos->index, len, fp, lexer_pos->line,
+        token_alloc(TOKEN_FLOAT_LIT, src + lexer_pos->index, len + ONE_CHARACTER, fp,
+                    lexer_pos->line,
                     lexer_pos->col);
     lexer_append(lexer, tok);
-    lexer_pos->index += len;
+    lexer_pos->index += len + ONE_CHARACTER;
     lexer_pos->col += TWO_CHARACTERS;
 }
 
