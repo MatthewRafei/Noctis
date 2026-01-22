@@ -12,7 +12,7 @@ set -e
 # -- Debug or Release mode --
 # Usage: ./build.sh [DEBUG|RELEASE]
 # debug if no argument is given
-MODE=${1:-DEBUG}
+MODE=${1:-STATIC}
 
 # C99 and up
 # Modification have been made to make this code base as portable as possible
@@ -24,11 +24,13 @@ SANITIZE="-fsanitize=address,undefined -fno-omit-frame-pointer"
 SRC="*.c"
 OUT="noctis"
 
-if [ "$MODE" = "DEBUG" ]; then
+if [ "$MODE" = "STATIC" ]; then
     set -x
     CFLAGS="$COMMON_FLAGS -std=c17 -g -O0 $SANITIZE"
+elif [ "$MODE" = "DEBUG"   ]; then
+    CFLAGS="$COMMON_FLAGS -std=c17 -g -O0"
 elif [ "$MODE" = "RELEASE" ]; then
-    CFLAGS="$COMMON_FLAGS -std=c17 -O2"
+    CFLAGS="$COMMON_FLAGS -std=c17 -O3"
 else
     echo "Unknown mode: $MODE"
     exit 1
@@ -51,7 +53,7 @@ if command -v cppcheck &> /dev/null; then
         --enable=warning,style,performance,portability \
         --check-level=exhaustive \
         --inconclusive \
-        --std=gnu17 --language=c --force \
+        --std=c17 --language=c --force \
         -Iinclude \
         $SRC
 else
