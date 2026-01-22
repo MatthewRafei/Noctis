@@ -175,7 +175,7 @@ enum Token_Type *determine_symbol(const char *s,
     char *buff = (char *) s_malloc(op_len + ONE_CHARACTER);
 
     if (op_len < sizeof(buff)) {
-        strncpy(buff, s, op_len);
+        memcpy(buff, s, op_len);
         buff[op_len] = '\0';
     } else {
         free(buff);
