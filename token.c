@@ -128,6 +128,8 @@ char *enum_to_str(enum Token_Type type)
             return "TOKEN_MUT";
         case TOKEN_ARROW:
             return "TOKEN_ARROW";
+        case TOKEN_BOOL:
+            return "TOKEN_BOOL";
         default:
             // GCC will complain 'TOKEN_SYMBOL_LEN'
             // and 'TOKEN_KEYWORD_LEN' are not accounted

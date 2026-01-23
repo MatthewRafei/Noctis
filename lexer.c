@@ -86,7 +86,7 @@ struct S_Umap init_sym_keyword_tbl(struct CompilerContext *context)
            Because s_umap_insert() takes void* as the value, we need to create a variable of 
            the appropriate Token_Type to match the keyword.
 
-           The addition of `+1` and the `i + (int)TOKEN_SYMBOL_LEN` ensures that we're 
+           The addition of `(i + TOKEN_SYMBOL_LEN) + 1` ensures that we're 
            correctly indexing into the Token_Type enum for the corresponding keyword.
          */
         enum Token_Type token = (enum Token_Type) (i + TOKEN_SYMBOL_LEN) + 1;
