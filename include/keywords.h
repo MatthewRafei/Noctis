@@ -21,6 +21,7 @@
 #define KEYWORD_UNIT    "unit"
 #define KEYWORD_LET     "let"
 #define KEYWORD_MUT     "mut"
+#define KEYWORD_BOOL    "bool"
 
 // Keyword as compound literal 
 // We can make an array of keywords
@@ -46,6 +47,7 @@
     KEYWORD_UNIT,				\
     KEYWORD_LET,				\
     KEYWORD_MUT, 				\
+    KEYWORD_BOOL,               \
 }
 
 #endif                          // KEYWORDS_H

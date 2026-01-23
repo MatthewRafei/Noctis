@@ -61,6 +61,7 @@ enum Token_Type {
     TOKEN_UNIT,
     TOKEN_LET,
     TOKEN_MUT,
+    TOKEN_BOOL,
     TOKEN_KEYWORD_LEN,          // DO NOT USE
 
     // Literals

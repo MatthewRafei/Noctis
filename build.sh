@@ -10,7 +10,7 @@
 set -e
 
 # -- Debug or Release mode --
-# Usage: ./build.sh [DEBUG|RELEASE]
+# Usage: ./build.sh [STATIC|DEBUG|RELEASE]
 # debug if no argument is given
 MODE=${1:-STATIC}
 
@@ -28,6 +28,7 @@ if [ "$MODE" = "STATIC" ]; then
     set -x
     CFLAGS="$COMMON_FLAGS -std=c17 -g -O0 $SANITIZE"
 elif [ "$MODE" = "DEBUG"   ]; then
+    set -x
     CFLAGS="$COMMON_FLAGS -std=c17 -g -O0"
 elif [ "$MODE" = "RELEASE" ]; then
     CFLAGS="$COMMON_FLAGS -std=c17 -O3"
