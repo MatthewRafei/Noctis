@@ -9,13 +9,13 @@ export func add(a: int, b: int) -> int {
 
 func main() -> unit {
     let mut i: int = 5;
-    if !i > 3 {
+    if !(i > 3) {
         print(s);
     }
-    while i < 7 {
+    while (i < 7) {
         i = i + 1;
     }
-    for j: int = 1; j < 5; j = j + 1 {
+    for (j: int = 1; j < 5; j = j + 1) {
         print(1 + 2 * 3);
     }
     let b: bool = true;
